@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MJ Hub v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--red:#C8392B;--red2:#E85040;--dark:#12100E;--dark2:#1E1A17;--warm:#F7F2ED;--mid:#8B7B75;--accent:#D4A853;--green:#2A7A50;--blue:#2563EB;--border:rgba(255,255,255,0.06);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--dark);color:var(--warm);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;overflow-x:hidden;}
+.layout{display:flex;min-height:100vh;}
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--dark2);border-right:1px solid var(--border);position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
+.logo{padding:24px 20px 18px;border-bottom:1px solid var(--border);}
+.logo-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:900;color:white;}
+.logo-sub{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-top:3px;}
+.logo-v{font-size:9px;color:rgba(255,255,255,0.18);font-family:'DM Mono',monospace;margin-top:2px;}
+nav{padding:12px 0;flex:1;}
+.nav-section{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.18);padding:10px 20px 3px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:10px 20px;font-size:12px;color:rgba(255,255,255,0.42);cursor:pointer;transition:all 0.2s;border-left:2px solid transparent;}
+.nav-item:hover{color:white;background:rgba(255,255,255,0.04);}
+.nav-item.active{color:white;border-left-color:var(--red);background:rgba(200,57,43,0.08);}
+.nav-badge{margin-left:auto;background:var(--red);color:white;font-size:9px;padding:2px 5px;border-radius:2px;}
+.sidebar-footer{padding:14px 20px;border-top:1px solid var(--border);font-size:10px;color:rgba(255,255,255,0.2);display:flex;align-items:center;gap:6px;}
+.sdot{width:6px;height:6px;border-radius:50%;background:#4ade80;flex-shrink:0;}
+.sdot.off{background:rgba(255,255,255,0.15);}
+/* MAIN */
+.main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--dark2);border-bottom:1px solid var(--border);padding:13px 32px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;}
+.topbar-date{font-size:10px;color:var(--mid);font-family:'DM Mono',monospace;margin-top:2px;}
+.topbar-actions{display:flex;gap:7px;align-items:center;}
+.content{padding:24px 32px;flex:1;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+/* BUTTONS */
+.btn{padding:8px 16px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;border:none;transition:all 0.2s;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px;}
+.btn-red{background:var(--red);color:white;} .btn-red:hover{background:var(--red2);}
+.btn-outline{background:transparent;color:var(--warm);border:1px solid rgba(255,255,255,0.14);} .btn-outline:hover{border-color:var(--red);color:var(--red);}
+.btn-green{background:var(--green);color:white;}
+.btn-blue{background:var(--blue);color:white;}
+.btn-gold{background:rgba(212,168,83,0.2);color:var(--accent);border:1px solid rgba(212,168,83,0.3);}
+.btn-sm{padding:5px 11px;font-size:10px;}
+.btn-xs{padding:3px 7px;font-size:9px;}
+/* CARDS / GRID */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.card{background:var(--dark2);border:1px solid var(--border);padding:18px 20px;}
+.card-top{border-top:2px solid var(--red);}
+.stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--accent);line-height:1;}
+.stat-label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mid);margin-top:3px;}
+.stat-sub{font-size:10px;color:rgba(255,255,255,0.22);margin-top:2px;}
+/* SECTION */
+.sec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.sec-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;}
+.divider{height:1px;background:var(--border);margin:18px 0;}
+.highlight{background:rgba(212,168,83,0.07);border:1px solid rgba(212,168,83,0.2);padding:12px 16px;font-size:12px;line-height:1.7;margin:14px 0;}
+.highlight strong{color:var(--accent);}
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--green);color:white;padding:10px 16px;font-size:12px;font-weight:600;z-index:9999;transform:translateY(60px);opacity:0;transition:all 0.3s;}
+.toast.show{transform:translateY(0);opacity:1;}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:200;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--dark2);border:1px solid rgba(255,255,255,0.1);padding:28px;width:500px;max-width:94vw;max-height:90vh;overflow-y:auto;}
+.modal h3{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:18px;}
+.fg{margin-bottom:12px;}
+.fg label{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--mid);display:block;margin-bottom:4px;}
+.fg input,.fg select,.fg textarea{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:white;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--red);}
+.fg select option{background:var(--dark2);}
+.fg textarea{resize:vertical;min-height:60px;}
+.modal-actions{display:flex;gap:8px;margin-top:18px;justify-content:flex-end;}
+/* KANBAN */
+.kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.kcol{background:rgba(255,255,255,0.02);border:1px solid var(--border);padding:10px;}
+.kcol-title{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;}
+.kcol-title span{background:rgba(255,255,255,0.07);padding:2px 5px;font-size:10px;}
+.lcard{background:var(--dark2);border:1px solid var(--border);padding:10px;margin-bottom:6px;transition:border-color 0.2s,transform 0.15s;cursor:default;}
+.lcard:hover{border-color:rgba(200,57,43,0.35);transform:translateY(-1px);}
+.lcard.stale{border-left:2px solid #fb923c;}
+.lcard.hot{border-left:2px solid #4ade80;}
+.lcard-name{font-size:12px;font-weight:600;color:white;}
+.lcard-co{font-size:11px;color:var(--mid);}
+.ltags{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;}
+.ltag{font-size:9px;letter-spacing:.8px;text-transform:uppercase;padding:2px 5px;}
+.tag-pm{background:rgba(37,99,235,0.2);color:#60a5fa;}
+.tag-strategy{background:rgba(212,168,83,0.2);color:var(--accent);}
+.tag-ads{background:rgba(42,122,80,0.2);color:#4ade80;}
+.tag-val{background:rgba(42,122,80,0.12);color:#4ade80;}
+.lcard-date{font-size:9px;color:rgba(255,255,255,0.18);margin-top:4px;font-family:'DM Mono',monospace;}
+.stale-badge{font-size:9px;color:#fb923c;margin-top:3px;}
+.lcard-actions{display:flex;gap:3px;margin-top:6px;flex-wrap:wrap;}
+/* MSG PREVIEW */
+.msg-preview{display:none;margin-top:7px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.08);padding:9px;font-size:11px;color:rgba(255,255,255,0.72);line-height:1.6;white-space:pre-wrap;}
+/* PIPELINE FUNNEL */
+.funnel-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;}
+.funnel-bar-wrap{flex:1;height:22px;background:rgba(255,255,255,0.04);position:relative;}
+.funnel-bar{height:100%;background:linear-gradient(to right,var(--red),var(--accent));transition:width .6s;}
+.funnel-label{font-size:11px;color:rgba(255,255,255,0.5);width:110px;flex-shrink:0;}
+.funnel-pct{font-size:10px;color:var(--mid);width:40px;text-align:right;flex-shrink:0;font-family:'DM Mono',monospace;}
+/* PROGRESS */
+.pbar{background:rgba(255,255,255,0.07);height:3px;margin-top:8px;}
+.pfill{height:3px;background:linear-gradient(to right,var(--red),var(--accent));transition:width .5s;}
+/* SCRIPTS */
+.stabs{display:flex;gap:2px;margin-bottom:16px;flex-wrap:wrap;}
+.stab{padding:7px 14px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;background:rgba(255,255,255,0.04);color:var(--mid);border:none;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.stab.active,.stab:hover{background:var(--red);color:white;}
+.scontent{display:none;}
+.scontent.active{display:block;}
+.sbox{background:var(--dark2);border-left:3px solid var(--red);padding:18px 20px;margin-bottom:12px;position:relative;}
+.sbox.grey{border-left-color:rgba(255,255,255,0.12);}
+.slabel{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:6px;font-weight:700;}
+.slabel.g{color:var(--mid);}
+.stext{font-size:12px;line-height:1.85;color:rgba(255,255,255,0.8);white-space:pre-wrap;}
+.snote{background:rgba(212,168,83,0.08);border-left:2px solid var(--accent);padding:8px 11px;margin-top:10px;font-size:11px;color:rgba(212,168,83,0.85);}
+.copy-btn{position:absolute;top:10px;right:10px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--mid);padding:3px 9px;font-size:9px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.copy-btn:hover{border-color:var(--red);color:var(--red);}
+/* LINKEDIN */
+.ptypes{display:flex;gap:5px;margin-bottom:16px;flex-wrap:wrap;}
+.ptype{padding:7px 13px;font-size:11px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--mid);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.ptype.active,.ptype:hover{background:rgba(10,102,194,0.2);border-color:#0A66C2;color:#60a5fa;}
+.li-wrap{background:#f3f2ef;border-radius:4px;overflow:hidden;margin-top:14px;}
+.li-header{padding:11px 14px;display:flex;align-items:center;gap:9px;background:white;border-bottom:1px solid #e0e0e0;}
+.li-av{width:38px;height:38px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;flex-shrink:0;}
+.li-name{font-size:12px;font-weight:700;color:#1a1a1a;font-family:sans-serif;}
+.li-title{font-size:10px;color:#666;font-family:sans-serif;}
+.li-body{padding:13px 14px;font-size:12px;color:#1a1a1a;line-height:1.65;white-space:pre-wrap;background:white;min-height:100px;}
+.li-body.empty{color:#999;font-style:italic;}
+.li-bar{padding:9px 14px;background:white;border-top:1px solid #e0e0e0;display:flex;align-items:center;}
+.li-cc{font-size:10px;color:#999;margin-left:auto;font-family:'DM Mono',monospace;}
+/* PROPOSAL */
+.pform{background:var(--dark2);border:1px solid var(--border);padding:22px;margin-bottom:14px;}
+.pout{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);padding:22px;min-height:140px;font-size:12px;line-height:1.85;white-space:pre-wrap;font-family:'DM Mono',monospace;color:rgba(255,255,255,0.78);}
+.pout.empty{color:var(--mid);font-style:italic;font-family:'DM Sans',sans-serif;}
+/* PLAN */
+.dblock{background:var(--dark2);border:1px solid var(--border);padding:18px 22px;margin-bottom:9px;}
+.dheader{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.dtitle{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;}
+.dbadge{font-size:9px;padding:3px 9px;background:rgba(200,57,43,0.2);color:var(--red);letter-spacing:1px;text-transform:uppercase;}
+.dbadge.done{background:rgba(42,122,80,0.2);color:#4ade80;}
+.titem{display:flex;gap:9px;align-items:flex-start;padding:8px 9px;background:rgba(255,255,255,0.02);cursor:pointer;transition:background .15s;margin-bottom:3px;}
+.titem:hover{background:rgba(255,255,255,0.05);}
+.titem.done{opacity:0.38;}
+.titem.done .ttext{text-decoration:line-through;}
+.tcheck{width:15px;height:15px;border:1.5px solid rgba(255,255,255,0.14);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:9px;}
+.titem.done .tcheck{background:var(--green);border-color:var(--green);color:white;}
+.ttext{font-size:12px;color:rgba(255,255,255,0.73);line-height:1.5;flex:1;}
+.tpri{font-size:8px;letter-spacing:.8px;text-transform:uppercase;padding:2px 5px;background:rgba(200,57,43,0.18);color:var(--red);flex-shrink:0;}
+.tpri.med{background:rgba(212,168,83,0.18);color:var(--accent);}
+/* CALENDAR */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px;}
+.cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;}
+.cal-day-name{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mid);text-align:center;padding:4px 0;}
+.cal-day{background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:7px;min-height:72px;position:relative;transition:border-color .2s;}
+.cal-day:hover{border-color:rgba(200,57,43,0.3);}
+.cal-day.today{border-color:var(--red);background:rgba(200,57,43,0.06);}
+.cal-day.other-month{opacity:0.25;}
+.cal-num{font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:4px;font-family:'DM Mono',monospace;}
+.cal-day.today .cal-num{color:var(--red);font-weight:700;}
+.cal-event{font-size:9px;padding:2px 5px;margin-bottom:2px;border-radius:2px;color:white;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ev-call{background:rgba(37,99,235,0.7);}
+.ev-prop{background:rgba(212,168,83,0.7);color:#1a1a1a;}
+.ev-task{background:rgba(42,122,80,0.7);}
+.ev-follow{background:rgba(200,57,43,0.7);}
+/* INVOICING */
+.inv-table{width:100%;border-collapse:collapse;font-size:12px;}
+.inv-table th{background:rgba(255,255,255,0.06);padding:8px 11px;text-align:left;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mid);}
+.inv-table td{padding:8px 11px;border-bottom:1px solid rgba(255,255,255,0.04);color:rgba(255,255,255,0.72);}
+.inv-table tr:last-child td{border-bottom:none;}
+.inv-table tr:hover td{background:rgba(255,255,255,0.02);}
+.status-badge{font-size:9px;padding:2px 7px;letter-spacing:.8px;text-transform:uppercase;}
+.sb-pending{background:rgba(212,168,83,0.2);color:var(--accent);}
+.sb-sent{background:rgba(37,99,235,0.2);color:#60a5fa;}
+.sb-paid{background:rgba(42,122,80,0.2);color:#4ade80;}
+.sb-overdue{background:rgba(200,57,43,0.2);color:var(--red);}
+/* CLIENT TASKS */
+.ct-block{background:var(--dark2);border:1px solid var(--border);padding:16px 20px;margin-bottom:9px;}
+.ct-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;}
+.ct-name{font-size:14px;font-weight:600;color:white;}
+.ct-service{font-size:10px;color:var(--mid);background:rgba(255,255,255,0.06);padding:2px 7px;}
+/* SHEETS */
+.wstep{background:var(--dark2);border:1px solid var(--border);padding:18px 22px;margin-bottom:7px;display:flex;align-items:flex-start;gap:14px;}
+.wnum{width:30px;height:30px;background:var(--red);color:white;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;flex-shrink:0;}
+.wnum.done{background:var(--green);}
+.wcode{background:rgba(0,0,0,0.4);border:1px solid var(--border);padding:9px 12px;font-family:'DM Mono',monospace;font-size:10px;color:#4ade80;margin-top:9px;white-space:pre-wrap;word-break:break-all;}
+/* ALERTS */
+.alert-bar{background:rgba(251,146,60,0.1);border:1px solid rgba(251,146,60,0.25);padding:10px 16px;font-size:12px;color:#fb923c;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.alert-bar.hidden{display:none;}
+/* PROPOSAL HISTORY */
+.ph-item{background:var(--dark2);border:1px solid var(--border);padding:12px 16px;margin-bottom:7px;display:flex;align-items:center;gap:12px;}
+.ph-name{flex:1;font-size:13px;font-weight:600;color:white;}
+.ph-service{font-size:11px;color:var(--mid);}
+.ph-date{font-size:10px;color:rgba(255,255,255,0.25);font-family:'DM Mono',monospace;width:90px;text-align:right;}
+/* RESPONSIVE */
+@media(max-width:900px){.sidebar{display:none;}.main{margin-left:0;}.kanban{grid-template-columns:1fr 1fr;}.grid4{grid-template-columns:1fr 1fr;}.grid2{grid-template-columns:1fr;}.content{padding:14px;}}
+</style>
+</head>
+<body>
+<div class="layout">
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-name">MJ Lidueña</div>
+    <div class="logo-sub">Operations Hub</div>
+    <div class="logo-v">v3.0 · full stack</div>
+  </div>
+  <nav>
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="nav('dashboard')">◈ Dashboard</div>
+    <div class="nav-item" onclick="nav('crm')">◎ CRM / Pipeline</div>
+    <div class="nav-item" onclick="nav('calendario')">▦ Calendario</div>
+    <div class="nav-section">Clientes Activos</div>
+    <div class="nav-item" onclick="nav('clientes')">◉ Tareas por Cliente</div>
+    <div class="nav-item" onclick="nav('facturacion')">◇ Facturación</div>
+    <div class="nav-section">Captación</div>
+    <div class="nav-item" onclick="nav('propuestas')">▣ Propuestas</div>
+    <div class="nav-item" onclick="nav('scripts')">⟳ Scripts</div>
+    <div class="nav-item" onclick="nav('linkedin')">▶ LinkedIn Posts</div>
+    <div class="nav-section">Sistema</div>
+    <div class="nav-item" onclick="nav('plan')">✦ Plan Diario</div>
+    <div class="nav-item" onclick="nav('klaviyo')">✉ Klaviyo</div>
+    <div class="nav-item" onclick="nav('sync')">⬆ Sync Sheets</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sdot off" id="sync-dot"></div>
+    <span id="sync-label">Sheets: no configurado</span>
+  </div>
+</aside>
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="tb-title">Dashboard</div>
+      <div class="topbar-date" id="tb-date"></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-outline btn-sm" onclick="exportCSV()">↓ CSV</button>
+      <button class="btn btn-red btn-sm" onclick="openLeadModal()">+ Lead</button>
+    </div>
+  </div>
+  <div class="content">
+
+  <!-- ═══ DASHBOARD ═══ -->
+  <div class="tab-panel active" id="tab-dashboard">
+    <div id="stale-alert" class="alert-bar hidden">⚠ Tienes <strong id="stale-count">0</strong> leads sin movimiento en +5 días — revísalos en el CRM</div>
+    <div class="grid4" id="dash-stats"></div>
+    <div class="grid2" style="margin-bottom:16px;">
+      <div class="card">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:8px;">Ingresos potenciales pipeline</div>
+        <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:var(--accent);" id="d-potencial">0€</div>
+        <div style="font-size:10px;color:var(--mid);margin-top:2px;">leads en llamada + propuesta + cerrado</div>
+      </div>
+      <div class="card">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:8px;">Objetivo mes — 1.800€</div>
+        <div style="font-family:'Playfair Display',serif;font-size:36px;font-weight:900;color:white;" id="d-cerrado">0€</div>
+        <div class="pbar"><div class="pfill" id="d-prog" style="width:0%"></div></div>
+        <div style="font-size:10px;color:var(--mid);margin-top:4px;" id="d-pct">0% conseguido</div>
+      </div>
+    </div>
+    <!-- Funnel de conversión -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:14px;">Embudo de conversión</div>
+      <div id="funnel-rows"></div>
+      <div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:10px;">Ratio global contacto→cierre: <span id="ratio-global" style="color:var(--accent);">—</span></div>
+    </div>
+    <!-- Próximas acciones + leads calientes -->
+    <div class="grid2">
+      <div class="card">
+        <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:12px;">🔥 Próximas acciones</div>
+        <div id="next-actions"></div>
+      </div>
+      <div class="card">
+        <div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:12px;">❄ Leads fríos (sin movimiento +5d)</div>
+        <div id="cold-leads"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CRM ═══ -->
+  <div class="tab-panel" id="tab-crm">
+    <div class="sec-header">
+      <div class="sec-title">Pipeline de Leads</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;">
+        <button class="btn btn-red btn-sm" onclick="importLeads()">📥 Cargar 103 leads</button>
+        <button class="btn btn-outline btn-sm" onclick="exportCSV()">↓ CSV</button>
+        <button class="btn btn-red" onclick="openLeadModal()">+ Añadir Lead</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+      <input id="crm-q" placeholder="🔍 Buscar..." oninput="renderKanban()" style="flex:1;min-width:160px;padding:7px 11px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:white;font-size:12px;outline:none;">
+      <select id="crm-origen" onchange="renderKanban()" style="padding:7px 9px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:white;font-size:11px;outline:none;cursor:pointer;">
+        <option value="">Todos los orígenes</option>
+        <option>Clientes pasados</option><option>Salud</option><option>Ecommerce</option>
+        <option>Agencias</option><option>Red Ajedrez</option>
+      </select>
+      <select id="crm-sort" onchange="renderKanban()" style="padding:7px 9px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:white;font-size:11px;outline:none;cursor:pointer;">
+        <option value="prioridad">Prioridad</option><option value="valor">Valor €</option>
+        <option value="nombre">A-Z</option><option value="stale">Más fríos</option>
+      </select>
+      <button onclick="clearFilters()" style="padding:7px 10px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.4);font-size:10px;cursor:pointer;">✕</button>
+    </div>
+    <div id="crm-info" style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:9px;"></div>
+    <div class="kanban" id="kanban-board">
+      <div class="kcol"><div class="kcol-title">Por contactar <span id="cnt-contactar">0</span></div><div id="col-contactar"></div></div>
+      <div class="kcol"><div class="kcol-title">Contactado <span id="cnt-contactado">0</span></div><div id="col-contactado"></div></div>
+      <div class="kcol"><div class="kcol-title">Llamada <span id="cnt-llamada">0</span></div><div id="col-llamada"></div></div>
+      <div class="kcol"><div class="kcol-title">Propuesta <span id="cnt-propuesta">0</span></div><div id="col-propuesta"></div></div>
+      <div class="kcol"><div class="kcol-title">Cerrado 🎉 <span id="cnt-cerrado">0</span></div><div id="col-cerrado"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ CALENDARIO ═══ -->
+  <div class="tab-panel" id="tab-calendario">
+    <div class="sec-header">
+      <div class="sec-title">Calendario</div>
+      <div style="display:flex;gap:7px;align-items:center;">
+        <button class="btn btn-outline btn-sm" onclick="prevMonth()">‹ Anterior</button>
+        <span id="cal-title" style="font-size:13px;font-weight:600;min-width:120px;text-align:center;"></span>
+        <button class="btn btn-outline btn-sm" onclick="nextMonth()">Siguiente ›</button>
+        <button class="btn btn-red btn-sm" onclick="openEventModal()">+ Evento</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <span style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,0.5);"><span style="width:10px;height:10px;background:rgba(37,99,235,0.7);display:inline-block;"></span>Llamada</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,0.5);"><span style="width:10px;height:10px;background:rgba(212,168,83,0.7);display:inline-block;"></span>Propuesta</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,0.5);"><span style="width:10px;height:10px;background:rgba(42,122,80,0.7);display:inline-block;"></span>Tarea</span>
+      <span style="display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,0.5);"><span style="width:10px;height:10px;background:rgba(200,57,43,0.7);display:inline-block;"></span>Seguimiento</span>
+    </div>
+    <div class="cal-header" id="cal-day-names"></div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+
+  <!-- ═══ CLIENTES ACTIVOS ═══ -->
+  <div class="tab-panel" id="tab-clientes">
+    <div class="sec-header">
+      <div class="sec-title">Tareas por Cliente Activo</div>
+      <button class="btn btn-red" onclick="openClientModal()">+ Cliente</button>
+    </div>
+    <p style="font-size:12px;color:var(--mid);margin-bottom:16px;">Gestiona las tareas de cada cliente cerrado. Mantén esto actualizado antes de cada reunión quincenal.</p>
+    <div id="client-tasks-list"></div>
+    <div id="no-clients" style="font-size:13px;color:var(--mid);padding:30px 0;text-align:center;">Cuando cierres tu primer cliente, añádelo aquí para gestionar sus tareas.</div>
+  </div>
+
+  <!-- ═══ FACTURACIÓN ═══ -->
+  <div class="tab-panel" id="tab-facturacion">
+    <div class="sec-header">
+      <div class="sec-title">Facturación</div>
+      <button class="btn btn-red" onclick="openInvoiceModal()">+ Factura</button>
+    </div>
+    <div class="grid4" id="inv-stats" style="margin-bottom:18px;"></div>
+    <table class="inv-table" id="inv-table">
+      <thead><tr><th>#</th><th>Cliente</th><th>Servicio</th><th>Importe</th><th>Fecha emisión</th><th>Vencimiento</th><th>Estado</th><th></th></tr></thead>
+      <tbody id="inv-body"></tbody>
+    </table>
+    <div id="no-invoices" style="font-size:13px;color:var(--mid);padding:24px 0;text-align:center;">Cuando cierres tu primer cliente, crea la primera factura aquí.</div>
+  </div>
+
+  <!-- ═══ PROPUESTAS ═══ -->
+  <div class="tab-panel" id="tab-propuestas">
+    <div class="sec-header"><div class="sec-title">Generador de Propuestas</div></div>
+    <p style="font-size:12px;color:var(--mid);margin-bottom:16px;">Genera → copia a Canva → descarga PDF → adjunta al email.</p>
+    <div class="pform">
+      <div class="grid2" style="margin-bottom:11px;">
+        <div class="fg"><label>Cliente / empresa</label><input id="p-cliente" placeholder="Laura / Clínica Bienestar"></div>
+        <div class="fg"><label>Sector</label><input id="p-sector" placeholder="Salud, Ecommerce..."></div>
+      </div>
+      <div class="grid2" style="margin-bottom:11px;">
+        <div class="fg"><label>Servicio</label>
+          <select id="p-servicio">
+            <option value="pm">Project Management — 1.200€/mes</option>
+            <option value="estrategia">Consultoría Estrategia — 800€/mes</option>
+            <option value="ads">Performance Ads — 600€/mes</option>
+            <option value="combo">Pack Estrategia + PM — 1.800€/mes</option>
+          </select>
+        </div>
+        <div class="fg"><label>Duración</label>
+          <select id="p-duracion"><option>3 meses mínimo</option><option>6 meses</option><option>Mes a mes</option></select>
+        </div>
+      </div>
+      <div class="fg" style="margin-bottom:11px;"><label>Problema detectado</label><textarea id="p-problema" placeholder="No tienen PM, proyectos se retrasan..."></textarea></div>
+      <div class="fg" style="margin-bottom:16px;"><label>Objetivo del cliente</label><textarea id="p-objetivo" placeholder="Lanzar web en 2 meses, escalar Google Ads..."></textarea></div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;">
+        <button class="btn btn-red" onclick="genPropuesta()">⚡ Generar</button>
+        <button class="btn btn-outline btn-sm" onclick="copyPropuesta()">Copiar texto</button>
+        <button class="btn btn-outline btn-sm" onclick="savePropuestaDrive()">↓ Guardar .txt</button>
+        <button class="btn btn-gold btn-sm" onclick="savePropuestaHistory()">📋 Guardar en historial</button>
+      </div>
+    </div>
+    <div class="pout empty" id="pout">La propuesta aparecerá aquí.</div>
+    <div class="divider"></div>
+    <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mid);margin-bottom:12px;">Historial de propuestas enviadas</div>
+    <div id="prop-history"><div style="font-size:12px;color:var(--mid);">Ninguna propuesta guardada todavía.</div></div>
+  </div>
+
+  <!-- ═══ SCRIPTS ═══ -->
+  <div class="tab-panel" id="tab-scripts">
+    <div class="sec-header"><div class="sec-title">Scripts de Captación</div></div>
+    <p style="font-size:12px;color:var(--mid);margin-bottom:16px;">Personaliza los [corchetes] antes de enviar. Nunca el mismo texto sin tocar la primera frase.</p>
+    <div class="stabs">
+      <button class="stab active" onclick="switchScript(this,'sc-li')">LinkedIn Frío</button>
+      <button class="stab" onclick="switchScript(this,'sc-email')">Email Red</button>
+      <button class="stab" onclick="switchScript(this,'sc-ef-salud')">Email Frío Salud</button>
+      <button class="stab" onclick="switchScript(this,'sc-ef-ecom')">Email Frío Ecommerce</button>
+      <button class="stab" onclick="switchScript(this,'sc-ef-ag')">Email Frío Agencias</button>
+      <button class="stab" onclick="switchScript(this,'sc-call')">Llamada</button>
+      <button class="stab" onclick="switchScript(this,'sc-seg')">Seguimiento ×3</button>
+      <button class="stab" onclick="switchScript(this,'sc-cierre')">Cierre</button>
+    </div>
+    <div class="scontent active" id="sc-li">
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('sli1')">Copiar</button>
+      <div class="slabel">Mensaje de conexión (300 chars)</div>
+      <div class="stext" id="sli1">Hola [nombre], vi que [empresa] está apostando por [área concreta]. Me dedico a gestión de proyectos digitales y estrategia — trabajé con Endesa y Sanitas. Me gustaría conectar. ¿Te parece bien?</div></div>
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('sli2')">Copiar</button>
+      <div class="slabel">Seguimiento 48–72h tras conectar</div>
+      <div class="stext" id="sli2">Hola [nombre], gracias por conectar. Veo que en [empresa] estáis [actividad reciente]. Llevo 5 años gestionando proyectos digitales para Endesa y Sanitas — ahora trabajo como consultora independiente con muy pocos clientes.
+
+Si tienes un proyecto que necesita estructura, me encantaría contarte cómo trabajo. ¿Tienes 20 min esta semana?</div>
+      <div class="snote">💡 Propón la llamada directamente. No pidas perdón por proponer.</div></div>
+    </div>
+    <div class="scontent" id="sc-email">
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('sem1')">Copiar</button>
+      <div class="slabel">Asunto: Novedad y una idea para [empresa]</div>
+      <div class="stext" id="sem1">Hola [nombre],
+
+¿Cómo estás? Hace tiempo que no hablamos.
+
+Te escribo porque acabo de empezar a trabajar como consultora digital independiente, después de años llevando proyectos para Endesa y Sanitas.
+
+Pensé en ti porque [razón específica].
+
+¿Tienes 20 minutos esta semana para un café virtual?
+
+Un abrazo,
+María José · mjoseugr@gmail.com · +34 649 256 116</div>
+      <div class="snote">💡 Con conocidos: tono cercano. El objetivo es la llamada, no vender en el email.</div></div>
+    </div>
+    <div class="scontent" id="sc-ef-salud">
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('sef-salud')">Copiar</button>
+      <div class="slabel">Asunto: Gestión proyectos digitales para [Empresa] — sin contratación a jornada completa</div>
+      <div class="stext" id="sef-salud">Hola [Nombre],
+
+Te escribo porque llevo más de 5 años gestionando proyectos digitales en el sector salud — entre mis clientes figura Sanitas Mayores, donde coordiné campañas end-to-end con equipos de hasta 8 personas.
+
+Ahora trabajo como consultora independiente y ayudo a empresas como [Empresa] a estructurar y ejecutar su estrategia digital con orden y KPIs claros, sin necesidad de una contratación a jornada completa.
+
+¿Tendría sentido hablar 20 minutos esta semana?
+
+Un saludo,
+María José Lidueña · Consultora Estrategia Digital
+mjoseugr@gmail.com · +34 649 256 116
+https://mjoselidu.github.io/mariajoseliduena-/</div></div>
+    </div>
+    <div class="scontent" id="sc-ef-ecom">
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('sef-ecom')">Copiar</button>
+      <div class="slabel">Asunto: Coordinación proyectos digitales para [Empresa] — PM senior disponible</div>
+      <div class="stext" id="sef-ecom">Hola [Nombre],
+
+Me llamo María José Lidueña, consultora de estrategia digital especializada en ecommerce y gestión de proyectos. He coordinado proyectos para marcas como Endesa, Repsol y Pirelli, gestionando equipos de SEO, SEM, diseño y desarrollo.
+
+Trabajo con empresas medianas que necesitan estructura y ejecución en sus proyectos digitales sin incorporar a alguien a tiempo completo.
+
+¿Tiene sentido explorar si puedo aportar valor en [Empresa]? Encantada de comentarlo en 20 minutos.
+
+Un saludo,
+María José Lidueña · Consultora Estrategia Digital
+mjoseugr@gmail.com · +34 649 256 116
+https://mjoselidu.github.io/mariajoseliduena-/</div></div>
+    </div>
+    <div class="scontent" id="sc-ef-ag">
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('sef-ag')">Copiar</button>
+      <div class="slabel">Asunto: PM Digital Senior disponible para colaboración — Endesa, Sanitas, Repsol</div>
+      <div class="stext" id="sef-ag">Hola [Nombre],
+
+Soy María José Lidueña, PM digital con +5 años gestionando proyectos para Endesa, Sanitas Mayores y Repsol. He coordinado hasta 50 proyectos activos simultáneamente con equipos de 4-8 personas bajo metodología Agile.
+
+Trabajo como freelance y busco agencias con las que colaborar en picos de trabajo o proyectos donde necesiten un PM senior de confianza.
+
+¿Tienes 20 minutos esta semana para ver si hay encaje?
+
+Un saludo,
+María José Lidueña
+mjoseugr@gmail.com · +34 649 256 116</div></div>
+    </div>
+    <div class="scontent" id="sc-call">
+      <div class="sbox"><div class="slabel">Apertura (2 min)</div><div class="stext">"Muchas gracias por el tiempo. Mi objetivo hoy es entender vuestra situación y ver si puedo aportaros valor. ¿Te parece bien que empiece yo preguntando?"</div><div class="snote">💡 Quien pregunta, dirige.</div></div>
+      <div class="sbox grey"><div class="slabel g">Las 5 preguntas clave (15 min)</div><div class="stext">① ¿Cuál es vuestro mayor reto digital ahora mismo?
+② ¿Qué habéis intentado y qué resultado dio?
+③ Si en 3 meses eso estuviera resuelto, ¿qué cambiaría?
+④ ¿Quién gestiona ahora los proyectos digitales?
+⑤ ¿Hay un rango de inversión que tengáis en mente?</div><div class="snote">💡 Cuanto más hablan, más se venden solos.</div></div>
+      <div class="sbox"><div class="slabel">Cierre (5 min)</div><div class="stext">"Creo que hay encaje. En 48h os envío propuesta con alcance y precios. ¿Os viene bien?"
+
+[Si preguntan precio] "Entre 800€ y 1.800€/mes según el alcance. En la propuesta el detalle."</div><div class="snote">💡 Nunca cierres precio sin propuesta escrita.</div></div>
+    </div>
+    <div class="scontent" id="sc-seg">
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('seg1')">Copiar</button><div class="slabel">Seguimiento 1 — 3 días</div><div class="stext" id="seg1">Hola [nombre], quería asegurarme de que te llegó mi mensaje. ¿Tienes un hueco esta semana?</div></div>
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('seg2')">Copiar</button><div class="slabel">Seguimiento 2 — 5 días</div><div class="stext" id="seg2">Hola [nombre], entiendo que tienes la agenda llena. Te dejo este recurso por si te resulta útil: [artículo/insight de tu sector]. Sin presión — si quieres hablar, aquí estoy.</div></div>
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('seg3')">Copiar</button><div class="slabel">Seguimiento 3 — 7 días (break-up)</div><div class="stext" id="seg3">Hola [nombre], voy a dejarte tranquilo/a. Si surge algo donde pueda ayudarte, ya sabes dónde encontrarme. ¡Mucho ánimo con [su negocio]!</div><div class="snote">💡 El break-up message tiene tasas de respuesta altísimas.</div></div>
+    </div>
+    <div class="scontent" id="sc-cierre">
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('sc-cierre1')">Copiar</button><div class="slabel">Email al enviar propuesta</div><div class="stext" id="sc-cierre1">Asunto: Propuesta para [empresa] — [servicio]
+
+Hola [nombre],
+
+Te adjunto la propuesta para [objetivo concreto]. Lo más importante está en las primeras páginas: qué incluye, cómo trabajo y qué puedes esperar en los primeros 30 días.
+
+Si tienes cualquier pregunta, hablamos. Mi disponibilidad para empezar sería [fecha].
+
+Un abrazo,
+María José</div></div>
+      <div class="sbox" style="position:relative;"><button class="copy-btn" onclick="copyEl('sc-cierre2')">Copiar</button><div class="slabel">Seguimiento propuesta — 48h sin respuesta</div><div class="stext" id="sc-cierre2">Hola [nombre], ¿has tenido oportunidad de revisar la propuesta? Si tienes dudas o quieres ajustar algo, con mucho gusto. También podemos hacer una llamada de 15 min para revisarla juntos.</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ LINKEDIN ═══ -->
+  <div class="tab-panel" id="tab-linkedin">
+    <div class="sec-header"><div class="sec-title">LinkedIn Posts</div></div>
+    <p style="font-size:12px;color:var(--mid);margin-bottom:14px;">3 posts/semana = presencia constante + leads inbound.</p>
+    <div class="ptypes">
+      <button class="ptype active" onclick="selPost(this,'lanzamiento')">🚀 Lanzamiento</button>
+      <button class="ptype" onclick="selPost(this,'caso-exito')">🏆 Caso de éxito</button>
+      <button class="ptype" onclick="selPost(this,'aprendizaje')">💡 Aprendizaje</button>
+      <button class="ptype" onclick="selPost(this,'opinion')">🎯 Opinión</button>
+      <button class="ptype" onclick="selPost(this,'detras')">👀 Behind scenes</button>
+    </div>
+    <div class="pform">
+      <div class="fg" style="margin-bottom:14px;"><label>Tema (opcional)</label>
+        <textarea id="post-tema" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:white;width:100%;padding:8px 11px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;resize:vertical;min-height:60px;" placeholder="Ej: aprendí que el 80% de proyectos falla por falta de estructura..."></textarea>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;">
+        <button class="btn btn-red" onclick="genPost()">⚡ Generar</button>
+        <button class="btn btn-outline btn-sm" onclick="copyPost()">Copiar</button>
+        <button class="btn btn-blue btn-sm" onclick="pubLI()">💼 Abrir LinkedIn</button>
+      </div>
+    </div>
+    <div class="li-wrap">
+      <div class="li-header"><div class="li-av">MJ</div><div><div class="li-name">María José Lidueña</div><div class="li-title">Digital Strategy & Project Lead · Consultora independiente</div></div></div>
+      <div class="li-body empty" id="post-out">El post aparecerá aquí.</div>
+      <div class="li-bar"><span style="font-size:11px;color:#999;">👍 &nbsp; 💬 &nbsp; ↗</span><div class="li-cc" id="li-cc">0 / 3000</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="grid3">
+      <div style="background:rgba(200,57,43,0.08);border:1px solid rgba(200,57,43,0.15);padding:11px;font-size:11px;"><div style="color:var(--red);font-weight:700;margin-bottom:2px;">LUNES</div><div style="color:rgba(255,255,255,0.45);">Autoridad / caso de éxito</div></div>
+      <div style="background:rgba(212,168,83,0.06);border:1px solid rgba(212,168,83,0.15);padding:11px;font-size:11px;"><div style="color:var(--accent);font-weight:700;margin-bottom:2px;">MIÉRCOLES</div><div style="color:rgba(255,255,255,0.45);">Aprendizaje / insight</div></div>
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);padding:11px;font-size:11px;"><div style="color:white;font-weight:700;margin-bottom:2px;">VIERNES</div><div style="color:rgba(255,255,255,0.45);">Opinión / behind the scenes</div></div>
+    </div>
+  </div>
+
+  <!-- ═══ PLAN DIARIO ═══ -->
+  <div class="tab-panel" id="tab-plan">
+    <div class="sec-header"><div class="sec-title">Plan Diario — Auto-generado</div></div>
+    <div style="background:rgba(200,57,43,0.08);border:1px solid rgba(200,57,43,0.2);padding:11px 16px;margin-bottom:16px;font-size:12px;">
+      🎯 Objetivo: <strong>1 cliente cerrado este mes · 1.800€</strong>
+      <div class="pbar" style="margin-top:7px;"><div class="pfill" id="plan-prog" style="width:0%"></div></div>
+      <div style="font-size:10px;color:var(--mid);margin-top:3px;" id="plan-pct">0 de 0 tareas completadas</div>
+    </div>
+    <div id="plan-body"></div>
+
+    <!-- NOTAS MANUALES -->
+    <div class="card" style="margin-top:16px;border-top:2px solid var(--accent);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);">📝 Mis Notas</div>
+        <button class="btn btn-xs btn-gold" onclick="saveNotes()">Guardar</button>
+      </div>
+      <textarea id="plan-notes" placeholder="Escribe aquí lo que necesitas recordar para mañana... ej: revisar API key de Klaviyo" style="width:100%;min-height:120px;background:rgba(255,255,255,0.03);border:1px solid rgba(212,168,83,0.2);color:rgba(255,255,255,0.8);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.7;outline:none;resize:vertical;"></textarea>
+      <div id="notes-status" style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:5px;"></div>
+    </div>
+  </div>
+
+  <!-- ═══ KLAVIYO ═══ -->
+  <div class="tab-panel" id="tab-klaviyo">
+    <div class="sec-header"><div class="sec-title">Klaviyo — Automatización</div></div>
+    <p style="font-size:12px;color:var(--mid);margin-bottom:18px;">Introduce tu API key privada una sola vez. El hub gestiona los contactos automáticamente según el estado de cada lead.</p>
+
+    <!-- AVISO LOCAL -->
+    <div id="kv-local-warning" style="display:none;background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.35);padding:14px 18px;margin-bottom:18px;">
+      <div style="font-size:12px;font-weight:700;color:#fb923c;margin-bottom:6px;">⚠️ Estás abriendo el hub como archivo local</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.7;">
+        La conexión con Klaviyo <strong style="color:white;">no funciona desde tu ordenador</strong> — el navegador lo bloquea por seguridad (se llama CORS).<br>
+        Para activarlo, sube este archivo a <strong style="color:white;">GitHub Pages</strong> (gratis, 3 minutos):<br><br>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:3px 8px;display:inline-block;margin-bottom:4px;">1 → Ve a github.com y crea una cuenta gratuita</span><br>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:3px 8px;display:inline-block;margin-bottom:4px;">2 → Crea un repositorio nuevo (cualquier nombre)</span><br>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:3px 8px;display:inline-block;margin-bottom:4px;">3 → Sube este archivo (que se llama index.html)</span><br>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:3px 8px;display:inline-block;margin-bottom:4px;">4 → Ve a Settings → Pages → Branch: main → Save</span><br>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;background:rgba(255,255,255,0.06);padding:3px 8px;display:inline-block;">5 → Copia la URL que te da y ábrela — Klaviyo funcionará</span>
+      </div>
+    </div>
+
+    <!-- API KEY CONFIG -->
+    <div class="card" style="margin-bottom:14px;border-top:2px solid var(--accent);">
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;">Configuración</div>
+      <div class="fg" style="margin-bottom:10px;">
+        <label>Private API Key</label>
+        <div style="display:flex;gap:8px;">
+          <input type="password" id="kv-apikey" placeholder="pk_••••••••••••••••••••••••••••••••" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:white;padding:8px 11px;font-family:'DM Mono',monospace;font-size:12px;outline:none;">
+          <button class="btn btn-gold" onclick="saveKlaviyoKey()">Guardar key</button>
+          <button class="btn btn-outline btn-sm" onclick="toggleKeyVisibility()">👁</button>
+        </div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:5px;">Se guarda solo en tu navegador. Nunca se envía a ningún servidor excepto a Klaviyo.</div>
+      </div>
+      <div id="kv-status" style="font-size:12px;color:var(--mid);padding:8px 12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);">Estado: no configurado</div>
+    </div>
+
+    <!-- LISTAS -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:14px;">Listas en Klaviyo</div>
+      <div style="display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;">
+        <button class="btn btn-red btn-sm" onclick="setupKlaviyoLists()">⚡ Crear listas automáticamente</button>
+        <button class="btn btn-outline btn-sm" onclick="fetchKlaviyoLists()">↻ Verificar listas</button>
+      </div>
+      <div id="kv-lists" style="font-size:12px;color:var(--mid);">Configura tu API key para ver las listas.</div>
+    </div>
+
+    <!-- AUTOMATIZACIONES -->
+    <div class="card" style="margin-bottom:14px;">
+      <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-bottom:14px;">Automatizaciones activas</div>
+      <div style="display:flex;flex-direction:column;gap:7px;" id="kv-automations">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">
+          <div><div style="font-size:12px;font-weight:600;color:white;">Añadir lead → Crear perfil en Klaviyo</div><div style="font-size:10px;color:var(--mid);margin-top:2px;">Lista: MJ Hub — Leads</div></div>
+          <div id="auto-1" style="font-size:9px;padding:3px 8px;background:rgba(42,122,80,0.2);color:#4ade80;">ACTIVO</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">
+          <div><div style="font-size:12px;font-weight:600;color:white;">Propuesta enviada → Secuencia de seguimiento</div><div style="font-size:10px;color:var(--mid);margin-top:2px;">Lista: MJ Hub — Propuesta</div></div>
+          <div id="auto-2" style="font-size:9px;padding:3px 8px;background:rgba(42,122,80,0.2);color:#4ade80;">ACTIVO</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">
+          <div><div style="font-size:12px;font-weight:600;color:white;">Lead cerrado → Email de bienvenida como cliente</div><div style="font-size:10px;color:var(--mid);margin-top:2px;">Lista: MJ Hub — Clientes</div></div>
+          <div id="auto-3" style="font-size:9px;padding:3px 8px;background:rgba(42,122,80,0.2);color:#4ade80;">ACTIVO</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:rgba(255,255,255,0.02);border:1px solid var(--border);">
+          <div><div style="font-size:12px;font-weight:600;color:white;">Lead frío +5d → Flow de reactivación</div><div style="font-size:10px;color:var(--mid);margin-top:2px;">Lista: MJ Hub — Reactivación</div></div>
+          <div id="auto-4" style="font-size:9px;padding:3px 8px;background:rgba(42,122,80,0.2);color:#4ade80;">ACTIVO</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:10px;color:rgba(255,255,255,0.18);">Las automatizaciones se disparan automáticamente al cambiar el estado de un lead en el CRM, y al abrir el hub para leads fríos.</div>
+    </div>
+
+    <!-- LOG -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);">Log de sincronizaciones</div>
+        <div style="display:flex;gap:7px;">
+          <button class="btn btn-outline btn-sm" onclick="syncStalLeads()">↻ Sync leads fríos ahora</button>
+          <button class="btn btn-outline btn-sm" onclick="clearKvLog()">Limpiar log</button>
+        </div>
+      </div>
+      <div id="kv-log" style="font-size:11px;color:var(--mid);max-height:220px;overflow-y:auto;">Sin actividad todavía.</div>
+    </div>
+  </div>
+
+  <!-- ═══ SYNC ═══ -->
+  <div class="tab-panel" id="tab-sync">
+    <div class="sec-header"><div class="sec-title">Sync Google Sheets</div></div>
+    <p style="font-size:12px;color:var(--mid);margin-bottom:18px;">Configura una vez (5 min) y tendrás tu CRM en Google Drive.</p>
+    <div class="highlight"><strong>Flujo:</strong> Exporta CSV desde aquí → en tu Sheet ve a 🔴 MJ Hub → Importar CSV → listo con formato automático.</div>
+    <div style="margin:16px 0;">
+      <div class="wstep"><div class="wnum" id="wz1">1</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:white;margin-bottom:3px;">Crea carpeta en Google Drive</div><div style="font-size:11px;color:var(--mid);">Nueva carpeta → "MJ Hub — Clientes" → subcarpetas: CRM, Propuestas, Contratos.</div><div style="margin-top:8px;display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="window.open('https://drive.google.com','_blank')">Abrir Drive ↗</button><button class="btn btn-outline btn-sm" onclick="markW(1)">✓ Hecho</button></div></div></div>
+      <div class="wstep"><div class="wnum" id="wz2">2</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:white;margin-bottom:3px;">Crea Google Sheet nueva</div><div style="font-size:11px;color:var(--mid);">Dentro de la carpeta CRM, crea la hoja "Pipeline de Leads".</div><div style="margin-top:8px;display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="window.open('https://sheets.new','_blank')">Nueva Sheet ↗</button><button class="btn btn-outline btn-sm" onclick="markW(2)">✓ Hecho</button></div></div></div>
+      <div class="wstep"><div class="wnum" id="wz3">3</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:white;margin-bottom:3px;">Pega el Apps Script</div><div style="font-size:11px;color:var(--mid);margin-bottom:8px;">En tu Sheet: Extensiones → Apps Script → pega el código → guarda.</div><div class="wcode" id="wcode">function onOpen(){SpreadsheetApp.getUi().createMenu('🔴 MJ Hub').addItem('Importar CSV','importarCSV').addItem('Formatear','formatear').addToUi();}
+function importarCSV(){var ui=SpreadsheetApp.getUi();var r=ui.prompt('Pega el CSV del Hub:',ui.ButtonSet.OK_CANCEL);if(r.getSelectedButton()!==ui.Button.OK)return;var csv=r.getResponseText().trim();if(!csv){ui.alert('Vacío');return;}var rows=csv.split('\n').map(function(r){return r.split(',').map(function(c){return c.replace(/^"|"$/g,'');});});var s=SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();s.clearContents();s.getRange(1,1,rows.length,rows[0].length).setValues(rows);formatear();ui.alert('✅ '+( rows.length-1)+' leads importados.');}
+function formatear(){var s=SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();var r=s.getLastRow();var c=s.getLastColumn();if(r<1)return;s.getRange(1,1,1,c).setBackground('#C8392B').setFontColor('white').setFontWeight('bold');for(var i=2;i<=r;i++)s.getRange(i,1,1,c).setBackground(i%2===0?'#FFF5F3':'#FFFFFF');for(var j=1;j<=c;j++)s.autoResizeColumn(j);s.setFrozenRows(1);}</div>
+        <div style="margin-top:8px;display:flex;gap:6px;"><button class="btn btn-outline btn-sm" onclick="copyEl('wcode')">Copiar script</button><button class="btn btn-outline btn-sm" onclick="markW(3)">✓ Hecho</button></div></div></div>
+      <div class="wstep"><div class="wnum" id="wz4">4</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;color:white;margin-bottom:3px;">Exporta y sincroniza</div><div style="font-size:11px;color:var(--mid);">Pulsa "Exportar CSV" → en tu Sheet: 🔴 MJ Hub → Importar CSV → pega.</div><div style="margin-top:8px;"><button class="btn btn-outline btn-sm" onclick="exportCSV();markW(4)">↓ Exportar CSV ahora</button></div></div></div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:10px;">Vista previa de datos actuales</div>
+    <div id="sync-preview"></div>
+    <div style="margin-top:12px;"><button class="btn btn-green btn-sm" onclick="exportCSV()">↓ Exportar CSV completo</button></div>
+  </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /layout -->
+
+<!-- MODAL LEAD -->
+<div class="modal-overlay" id="m-lead">
+  <div class="modal">
+    <h3 id="m-lead-title">Añadir Lead</h3>
+    <div class="grid2"><div class="fg"><label>Nombre</label><input id="l-nombre"></div><div class="fg"><label>Empresa</label><input id="l-empresa"></div></div>
+    <div class="grid2"><div class="fg"><label>Servicio</label><select id="l-servicio"><option value="pm">Project Management</option><option value="strategy">Consultoría Estratégica</option><option value="ads">Performance Ads</option><option value="tbd">Por definir</option></select></div>
+    <div class="fg"><label>Estado</label><select id="l-status"><option value="contactar">Por contactar</option><option value="contactado">Contactado</option><option value="llamada">Llamada</option><option value="propuesta">Propuesta</option><option value="cerrado">Cerrado</option></select></div></div>
+    <div class="fg"><label>Email / LinkedIn</label><input id="l-contacto"></div>
+    <div class="fg"><label>Notas</label><textarea id="l-notas"></textarea></div>
+    <div class="grid2"><div class="fg"><label>Valor €/mes</label><input type="number" id="l-valor" placeholder="1200"></div>
+    <div class="fg"><label>Último contacto</label><input type="date" id="l-lastcontact"></div></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('m-lead')">Cancelar</button><button class="btn btn-red" onclick="saveLead()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- MODAL EVENTO -->
+<div class="modal-overlay" id="m-event">
+  <div class="modal">
+    <h3>Añadir Evento</h3>
+    <div class="fg"><label>Título</label><input id="ev-title" placeholder="Llamada con Laura / Envío propuesta..."></div>
+    <div class="grid2">
+      <div class="fg"><label>Fecha</label><input type="date" id="ev-date"></div>
+      <div class="fg"><label>Tipo</label><select id="ev-type"><option value="call">Llamada</option><option value="prop">Propuesta</option><option value="task">Tarea</option><option value="follow">Seguimiento</option></select></div>
+    </div>
+    <div class="fg"><label>Lead relacionado (opcional)</label><select id="ev-lead"><option value="">— ninguno —</option></select></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('m-event')">Cancelar</button><button class="btn btn-red" onclick="saveEvent()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- MODAL CLIENTE ACTIVO -->
+<div class="modal-overlay" id="m-client">
+  <div class="modal">
+    <h3>Añadir Cliente Activo</h3>
+    <div class="grid2"><div class="fg"><label>Nombre cliente</label><input id="cl-nombre"></div><div class="fg"><label>Empresa</label><input id="cl-empresa"></div></div>
+    <div class="grid2">
+      <div class="fg"><label>Servicio</label><select id="cl-servicio"><option value="pm">PM Digital</option><option value="strategy">Consultoría</option><option value="ads">Ads</option><option value="combo">Pack</option></select></div>
+      <div class="fg"><label>Importe €/mes</label><input type="number" id="cl-importe" placeholder="1200"></div>
+    </div>
+    <div class="fg"><label>Fecha inicio</label><input type="date" id="cl-inicio"></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('m-client')">Cancelar</button><button class="btn btn-red" onclick="saveClient()">Guardar</button></div>
+  </div>
+</div>
+
+<!-- MODAL FACTURA -->
+<div class="modal-overlay" id="m-invoice">
+  <div class="modal">
+    <h3>Nueva Factura</h3>
+    <div class="grid2"><div class="fg"><label>Cliente</label><input id="inv-cliente"></div><div class="fg"><label>Servicio</label><input id="inv-servicio" placeholder="PM Digital · Mes 1"></div></div>
+    <div class="grid2"><div class="fg"><label>Importe €</label><input type="number" id="inv-importe" placeholder="1200"></div><div class="fg"><label>Estado</label><select id="inv-status"><option value="pending">Pendiente</option><option value="sent">Enviada</option><option value="paid">Pagada</option><option value="overdue">Vencida</option></select></div></div>
+    <div class="grid2"><div class="fg"><label>Fecha emisión</label><input type="date" id="inv-fecha"></div><div class="fg"><label>Vencimiento</label><input type="date" id="inv-vence"></div></div>
+    <div class="modal-actions"><button class="btn btn-outline" onclick="closeModal('m-invoice')">Cancelar</button><button class="btn btn-red" onclick="saveInvoice()">Guardar</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let leads=JSON.parse(localStorage.getItem('mj3-leads')||'[]');
+let events=JSON.parse(localStorage.getItem('mj3-events')||'[]');
+let clients=JSON.parse(localStorage.getItem('mj3-clients')||'[]');
+let invoices=JSON.parse(localStorage.getItem('mj3-invoices')||'[]');
+let tasks=JSON.parse(localStorage.getItem('mj3-tasks')||'null');
+let propHistory=JSON.parse(localStorage.getItem('mj3-props')||'[]');
+let wizard=JSON.parse(localStorage.getItem('mj3-wizard')||'{}');
+let editingLead=null;
+let postType='lanzamiento';
+let calYear, calMonth;
+const today=new Date();
+calYear=today.getFullYear(); calMonth=today.getMonth();
+
+// ── INIT ──
+document.getElementById('tb-date').textContent=today.toLocaleDateString('es-ES',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+restoreWizard();
+
+// ── NAV ──
+const tabTitles={dashboard:'Dashboard',crm:'CRM / Pipeline',calendario:'Calendario',clientes:'Clientes Activos',facturacion:'Facturación',propuestas:'Propuestas',scripts:'Scripts',linkedin:'LinkedIn Posts',plan:'Plan Diario',sync:'Sync Google Sheets'};
+function nav(name){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')===`nav('${name}')`)n.classList.add('active');});
+  document.getElementById('tb-title').textContent=tabTitles[name];
+  if(name==='dashboard')renderDash();
+  if(name==='crm')renderKanban();
+  if(name==='calendario')renderCal();
+  if(name==='clientes')renderClients();
+  if(name==='facturacion')renderInvoices();
+  if(name==='plan')renderPlan();
+  if(name==='sync')renderSyncPreview();
+}
+
+// ── TOAST ──
+function showToast(msg,c='var(--green)'){const t=document.getElementById('toast');t.textContent=msg;t.style.background=c;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ── MODAL ──
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ── STALE CHECK ──
+function daysSince(dateStr){
+  if(!dateStr)return 999;
+  const d=new Date(dateStr.includes('/')?dateStr.split('/').reverse().join('-'):dateStr);
+  return Math.floor((today-d)/(1000*60*60*24));
+}
+function isStale(l){return daysSince(l.lastContact||l.fecha)>5 && l.status!=='cerrado';}
+
+// ── LEADS MODAL ──
+function openLeadModal(id=null){
+  editingLead=id;
+  document.getElementById('m-lead-title').textContent=id!==null?'Editar Lead':'Añadir Lead';
+  if(id!==null){const l=leads[id];
+    ['nombre','empresa','servicio','status','contacto','notas','valor'].forEach(f=>document.getElementById('l-'+f).value=l[f]||'');
+    document.getElementById('l-lastcontact').value=l.lastContact||'';
+  } else {
+    ['nombre','empresa','contacto','notas','valor','lastcontact'].forEach(f=>document.getElementById('l-'+f).value='');
+    document.getElementById('l-servicio').value='pm';
+    document.getElementById('l-status').value='contactar';
+  }
+  openModal('m-lead');
+  setTimeout(()=>document.getElementById('l-nombre').focus(),100);
+}
+function saveLead(){
+  const nombre=document.getElementById('l-nombre').value.trim();
+  if(!nombre){showToast('Añade el nombre','var(--red)');return;}
+  const lead={nombre,empresa:document.getElementById('l-empresa').value.trim(),
+    servicio:document.getElementById('l-servicio').value,status:document.getElementById('l-status').value,
+    contacto:document.getElementById('l-contacto').value.trim(),notas:document.getElementById('l-notas').value.trim(),
+    valor:parseInt(document.getElementById('l-valor').value)||0,
+    lastContact:document.getElementById('l-lastcontact').value||new Date().toISOString().slice(0,10),
+    fecha:new Date().toLocaleDateString('es-ES'),id:editingLead!==null?leads[editingLead].id:Date.now()};
+  if(editingLead!==null)leads[editingLead]=lead;
+  else leads.push(lead);
+  save();closeModal('m-lead');renderKanban();renderDash();
+  showToast(editingLead!==null?'✓ Lead actualizado':'✓ Lead añadido');editingLead=null;
+}
+function deleteLead(i){if(confirm('¿Eliminar?')){leads.splice(i,1);save();renderKanban();renderDash();showToast('Eliminado','#555');}}
+function moveLead(i,s){leads[i].status=s;leads[i].lastContact=new Date().toISOString().slice(0,10);save();renderKanban();renderDash();showToast('→ '+s);}
+function touchLead(i){leads[i].lastContact=new Date().toISOString().slice(0,10);save();renderKanban();renderDash();showToast('✓ Contacto registrado');}
+
+// ── KANBAN ──
+const svcTag={pm:'tag-pm',strategy:'tag-strategy',ads:'tag-ads',tbd:''};
+const svcLbl={pm:'PM',strategy:'Estrategia',ads:'Ads',tbd:'?'};
+const statuses=['contactar','contactado','llamada','propuesta','cerrado'];
+const nextStatus={contactar:'contactado',contactado:'llamada',llamada:'propuesta',propuesta:'cerrado'};
+const nextLbl={contactar:'Contactado →',contactado:'Llamada →',llamada:'Propuesta →',propuesta:'Cerrado →'};
+
+function getFiltered(){
+  const q=(document.getElementById('crm-q')?.value||'').toLowerCase();
+  const origen=document.getElementById('crm-origen')?.value||'';
+  const sort=document.getElementById('crm-sort')?.value||'prioridad';
+  let arr=leads.map((l,i)=>({...l,idx:i}));
+  if(q)arr=arr.filter(l=>(l.nombre+l.empresa+l.notas).toLowerCase().includes(q));
+  if(origen)arr=arr.filter(l=>(l.notas||'').includes(origen));
+  if(sort==='valor')arr.sort((a,b)=>b.valor-a.valor);
+  else if(sort==='nombre')arr.sort((a,b)=>(a.empresa||'').localeCompare(b.empresa||''));
+  else if(sort==='stale')arr.sort((a,b)=>daysSince(a.lastContact||a.fecha)-daysSince(b.lastContact||b.fecha));
+  else arr.sort((a,b)=>{const pa=(a.notas||'').includes('ALTA')?0:(a.notas||'').includes('MEDIA')?1:2;const pb=(b.notas||'').includes('ALTA')?0:(b.notas||'').includes('MEDIA')?1:2;return pa-pb;});
+  return arr;
+}
+function renderKanban(){
+  const arr=getFiltered();
+  const q=(document.getElementById('crm-q')?.value||'').trim();
+  const infoEl=document.getElementById('crm-info');
+  if(infoEl)infoEl.textContent=q?`Mostrando ${arr.length} de ${leads.length}`:'';
+  statuses.forEach(s=>{
+    const col=document.getElementById('col-'+s);
+    const cnt=document.getElementById('cnt-'+s);
+    const filtered=arr.filter(l=>l.status===s);
+    cnt.textContent=filtered.length;
+    col.innerHTML=filtered.length===0?'<div style="font-size:9px;color:rgba(255,255,255,0.1);text-align:center;padding:6px;">vacío</div>':
+      filtered.map(l=>{
+        const stale=isStale(l);
+        const days=daysSince(l.lastContact||l.fecha);
+        return `<div class="lcard ${stale?'stale':l.status==='llamada'?'hot':''}">
+          <div class="lcard-name">${l.nombre}</div>
+          <div class="lcard-co">${l.empresa||'—'}</div>
+          <div class="ltags">
+            <span class="ltag ${svcTag[l.servicio]}">${svcLbl[l.servicio]}</span>
+            ${l.valor?`<span class="ltag tag-val">${l.valor}€/m</span>`:''}
+          </div>
+          ${stale?`<div class="stale-badge">❄ ${days}d sin contacto</div>`:''}
+          <div class="lcard-date">${l.fecha} · último: ${l.lastContact||'—'}</div>
+          <div class="lcard-actions">
+            <button class="btn btn-xs" style="background:rgba(255,255,255,0.08);color:#ddd;border:none;" onclick="toggleMsg(${l.idx})">💬</button>
+            ${nextLbl[l.status]?`<button class="btn btn-green btn-xs" onclick="moveLead(${l.idx},'${nextStatus[l.status]}')">${nextLbl[l.status]}</button>`:'<span style="font-size:9px;color:#4ade80;">✓</span>'}
+            <button class="btn btn-xs" style="background:rgba(37,99,235,0.2);color:#60a5fa;border:none;" onclick="touchLead(${l.idx})" title="Registrar contacto hoy">📅</button>
+            <button class="btn btn-outline btn-xs" onclick="openLeadModal(${l.idx})">✎</button>
+            <button class="btn btn-xs" style="background:rgba(200,57,43,0.18);color:var(--red);border:none;" onclick="deleteLead(${l.idx})">✕</button>
+          </div>
+          <div id="mp${l.idx}" class="msg-preview">${buildMsg(l)}</div>
+        </div>`;
+      }).join('');
+  });
+}
+function buildMsg(l){
+  const msg=l.status==='contactar'?`Hola [Nombre], ${(l.notas||'').includes('pasado')||l.notas.includes('REFERENCIA')?'trabajé en proyectos digitales con '+l.empresa+' a través de agencia. Ahora soy consultora independiente (PM + estrategia) y me gustaría retomar el contacto. ¿Hablamos?':'llevo +5 años como PM digital senior — Endesa, Sanitas, Repsol. Ahora freelance. ¿Hablamos 20 min?'}`:'';
+  const charBadge=msg.length>0?`<span style="font-size:9px;color:${msg.length<=300?'#4ade80':'#fb923c'}">${msg.length} chars</span>`:'';
+  return `${charBadge}<div style="margin-top:5px;font-size:11px;">${msg||'Lead en progreso — usa los Scripts para el siguiente paso.'}</div>
+  <div style="margin-top:7px;display:flex;gap:4px;flex-wrap:wrap;">
+    ${msg?`<button class="btn btn-xs" style="background:var(--red);color:white;border:none;" onclick="event.stopPropagation();navigator.clipboard.writeText(document.getElementById('mp${l.idx}').querySelector('div:last-child').previousElementSibling.previousElementSibling.textContent).then(()=>showToast('✓ Copiado'))">📋 Copiar</button>`:''}
+    <button class="btn btn-xs" style="background:#0a66c2;color:white;border:none;" onclick="window.open('https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent((l.empresa||'')+' director digital')}','_blank')">🔍 LI</button>
+  </div>`;
+}
+function toggleMsg(i){const el=document.getElementById('mp'+i);if(el)el.style.display=el.style.display==='block'?'none':'block';}
+function clearFilters(){['crm-q','crm-origen','crm-sort'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='crm-sort'?'prioridad':'';});renderKanban();}
+
+// ── DASHBOARD ──
+function renderDash(){
+  const total=leads.length,calls=leads.filter(l=>l.status==='llamada').length;
+  const props=leads.filter(l=>l.status==='propuesta').length,closed=leads.filter(l=>l.status==='cerrado').length;
+  const contacted=leads.filter(l=>l.status==='contactado').length;
+  const potencial=leads.filter(l=>['llamada','propuesta','cerrado'].includes(l.status)).reduce((a,l)=>a+l.valor,0);
+  const cerradoTotal=leads.filter(l=>l.status==='cerrado').reduce((a,l)=>a+l.valor,0);
+  const stales=leads.filter(l=>isStale(l));
+  // Alert
+  const alertEl=document.getElementById('stale-alert');
+  alertEl.classList.toggle('hidden',stales.length===0);
+  document.getElementById('stale-count').textContent=stales.length;
+  // Stats
+  document.getElementById('dash-stats').innerHTML=[
+    {num:total,label:'Leads totales',sub:`${contacted} contactados`},
+    {num:calls,label:'Llamadas',sub:'agendadas'},
+    {num:props,label:'Propuestas',sub:'enviadas'},
+    {num:closed,label:'Cerrados',sub:cerradoTotal+'€ facturado'},
+  ].map(s=>`<div class="card card-top"><div class="stat-num">${s.num}</div><div class="stat-label">${s.label}</div><div class="stat-sub">${s.sub}</div></div>`).join('');
+  document.getElementById('d-potencial').textContent=potencial.toLocaleString('es-ES')+'€';
+  document.getElementById('d-cerrado').textContent=cerradoTotal.toLocaleString('es-ES')+'€';
+  const pct=Math.min(100,Math.round((cerradoTotal/1800)*100));
+  document.getElementById('d-prog').style.width=pct+'%';
+  document.getElementById('d-pct').textContent=pct+'% conseguido';
+  // Funnel
+  const funnelData=[
+    {label:'Por contactar',count:leads.filter(l=>l.status==='contactar').length},
+    {label:'Contactado',count:contacted},
+    {label:'Llamada',count:calls},
+    {label:'Propuesta',count:props},
+    {label:'Cerrado',count:closed},
+  ];
+  const maxF=Math.max(...funnelData.map(f=>f.count),1);
+  document.getElementById('funnel-rows').innerHTML=funnelData.map(f=>`
+    <div class="funnel-row">
+      <div class="funnel-label">${f.label}</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${Math.round((f.count/maxF)*100)}%"></div></div>
+      <div class="funnel-pct">${f.count}</div>
+    </div>`).join('');
+  const ratio=total>0?Math.round((closed/total)*100):0;
+  document.getElementById('ratio-global').textContent=ratio+'%';
+  // Next actions
+  const nextEl=document.getElementById('next-actions');
+  const actions=[];
+  if(calls>0)actions.push({c:'rgba(37,99,235,0.15)',b:'#0A66C2',t:`→ Tienes <strong>${calls} llamadas</strong> agendadas — prepara tus 5 preguntas`});
+  if(props>0)actions.push({c:'rgba(212,168,83,0.1)',b:'var(--accent)',t:`→ <strong>${props} propuestas</strong> abiertas — haz seguimiento en 48h`});
+  if(stales.length>0)actions.push({c:'rgba(251,146,60,0.1)',b:'#fb923c',t:`→ <strong>${stales.length} leads fríos</strong> — reactívalos o descártalos`});
+  if(total===0)actions.push({c:'rgba(200,57,43,0.1)',b:'var(--red)',t:'→ Añade tus primeros leads en <strong>CRM</strong>'});
+  actions.push({c:'rgba(10,102,194,0.08)',b:'#0A66C2',t:'→ Publica tu post semanal en <strong>LinkedIn Posts</strong>'});
+  nextEl.innerHTML=actions.map(a=>`<div style="padding:8px 11px;background:${a.c};border-left:2px solid ${a.b};font-size:11px;margin-bottom:5px;">${a.t}</div>`).join('');
+  // Cold leads
+  const coldEl=document.getElementById('cold-leads');
+  coldEl.innerHTML=stales.length===0
+    ?'<div style="font-size:11px;color:rgba(255,255,255,0.2);">Sin leads fríos ✓</div>'
+    :stales.slice(0,5).map(l=>`<div style="padding:7px 10px;background:rgba(251,146,60,0.07);border-left:2px solid rgba(251,146,60,0.4);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;">
+      <div><div style="font-size:12px;font-weight:600;">${l.nombre}</div><div style="font-size:10px;color:rgba(255,255,255,0.3);">${daysSince(l.lastContact||l.fecha)}d · ${l.status}</div></div>
+      <button class="btn btn-xs" style="background:var(--red);color:white;border:none;flex-shrink:0;" onclick="touchLead(${leads.indexOf(leads.find(x=>x.id===l.id))})">📅 Contacté</button>
+    </div>`).join('');
+}
+
+// ── CALENDAR ──
+const dayNames=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const monthNames=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+function renderCal(){
+  document.getElementById('cal-title').textContent=`${monthNames[calMonth]} ${calYear}`;
+  document.getElementById('cal-day-names').innerHTML=dayNames.map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1);
+  let startDow=first.getDay()-1;if(startDow<0)startDow=6;
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const daysInPrev=new Date(calYear,calMonth,0).getDate();
+  let cells=[];
+  for(let i=startDow-1;i>=0;i--)cells.push({day:daysInPrev-i,cur:false});
+  for(let d=1;d<=daysInMonth;d++)cells.push({day:d,cur:true});
+  while(cells.length%7!==0)cells.push({day:cells.length-startDow-daysInMonth+1,cur:false});
+  document.getElementById('cal-grid').innerHTML=cells.map(c=>{
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(c.day).padStart(2,'0')}`;
+    const isToday=c.cur&&calYear===today.getFullYear()&&calMonth===today.getMonth()&&c.day===today.getDate();
+    const dayEvents=events.filter(e=>e.date===dateStr);
+    const evHtml=dayEvents.map(e=>`<div class="cal-event ev-${e.type}" title="${e.title}">${e.title}</div>`).join('');
+    return `<div class="cal-day ${isToday?'today':''} ${!c.cur?'other-month':''}"><div class="cal-num">${c.day}</div>${evHtml}</div>`;
+  }).join('');
+}
+function prevMonth(){calMonth--;if(calMonth<0){calMonth=11;calYear--;}renderCal();}
+function nextMonth(){calMonth++;if(calMonth>11){calMonth=0;calYear++;}renderCal();}
+function openEventModal(){
+  document.getElementById('ev-date').value=new Date().toISOString().slice(0,10);
+  const sel=document.getElementById('ev-lead');
+  sel.innerHTML='<option value="">— ninguno —</option>'+leads.map(l=>`<option>${l.nombre} / ${l.empresa}</option>`).join('');
+  openModal('m-event');
+}
+function saveEvent(){
+  const title=document.getElementById('ev-title').value.trim();
+  if(!title){showToast('Añade un título','var(--red)');return;}
+  events.push({id:Date.now(),title,date:document.getElementById('ev-date').value,type:document.getElementById('ev-type').value,lead:document.getElementById('ev-lead').value});
+  saveAll();closeModal('m-event');renderCal();showToast('✓ Evento añadido');
+  document.getElementById('ev-title').value='';
+}
+
+// ── CLIENTS ──
+function renderClients(){
+  const list=document.getElementById('client-tasks-list');
+  const empty=document.getElementById('no-clients');
+  if(!clients.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=clients.map((c,ci)=>{
+    const ctasks=c.tasks||[];
+    const done=ctasks.filter(t=>t.done).length;
+    return `<div class="ct-block">
+      <div class="ct-header">
+        <div><div class="ct-name">${c.nombre} — ${c.empresa}</div><div style="font-size:10px;color:var(--mid);margin-top:2px;">${c.servicio} · ${c.importe||''}€/mes · desde ${c.inicio||'—'}</div></div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <span class="ct-service">${done}/${ctasks.length} tareas</span>
+          <button class="btn btn-red btn-sm" onclick="addClientTask(${ci})">+ Tarea</button>
+          <button class="btn btn-outline btn-xs" onclick="deleteClient(${ci})">✕</button>
+        </div>
+      </div>
+      <div class="pbar"><div class="pfill" style="width:${ctasks.length?Math.round((done/ctasks.length)*100):0}%"></div></div>
+      <div style="margin-top:10px;">${ctasks.map((t,ti)=>`
+        <div class="titem ${t.done?'done':''}" onclick="toggleClientTask(${ci},${ti})">
+          <div class="tcheck">${t.done?'✓':''}</div>
+          <div class="ttext">${t.text}</div>
+          <button class="btn btn-xs" style="background:rgba(200,57,43,0.18);color:var(--red);border:none;flex-shrink:0;" onclick="event.stopPropagation();deleteClientTask(${ci},${ti})">✕</button>
+        </div>`).join('')}
+        ${ctasks.length===0?'<div style="font-size:11px;color:rgba(255,255,255,0.2);padding:8px 0;">Sin tareas — añade la primera</div>':''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function openClientModal(){document.getElementById('cl-inicio').value=new Date().toISOString().slice(0,10);openModal('m-client');}
+function saveClient(){
+  const nombre=document.getElementById('cl-nombre').value.trim();
+  if(!nombre){showToast('Añade el nombre','var(--red)');return;}
+  clients.push({nombre,empresa:document.getElementById('cl-empresa').value.trim(),servicio:document.getElementById('cl-servicio').value,importe:parseInt(document.getElementById('cl-importe').value)||0,inicio:document.getElementById('cl-inicio').value,tasks:[]});
+  saveAll();closeModal('m-client');renderClients();showToast('✓ Cliente añadido');
+}
+function deleteClient(i){if(confirm('¿Eliminar cliente y sus tareas?')){clients.splice(i,1);saveAll();renderClients();}}
+function addClientTask(ci){
+  const text=prompt('Nueva tarea para '+clients[ci].nombre+':');
+  if(!text)return;
+  clients[ci].tasks.push({text,done:false});
+  saveAll();renderClients();
+}
+function toggleClientTask(ci,ti){clients[ci].tasks[ti].done=!clients[ci].tasks[ti].done;saveAll();renderClients();}
+function deleteClientTask(ci,ti){clients[ci].tasks.splice(ti,1);saveAll();renderClients();}
+
+// ── INVOICES ──
+const invStatusMap={pending:{cls:'sb-pending',lbl:'Pendiente'},sent:{cls:'sb-sent',lbl:'Enviada'},paid:{cls:'sb-paid',lbl:'Pagada'},overdue:{cls:'sb-overdue',lbl:'Vencida'}};
+function renderInvoices(){
+  const total=invoices.reduce((a,i)=>a+i.importe,0);
+  const paid=invoices.filter(i=>i.status==='paid').reduce((a,i)=>a+i.importe,0);
+  const pending=invoices.filter(i=>['pending','sent'].includes(i.status)).reduce((a,i)=>a+i.importe,0);
+  const overdue=invoices.filter(i=>i.status==='overdue').length;
+  document.getElementById('inv-stats').innerHTML=[
+    {num:invoices.length+'',label:'Facturas totales',sub:''},
+    {num:total.toLocaleString('es-ES')+'€',label:'Total facturado',sub:''},
+    {num:paid.toLocaleString('es-ES')+'€',label:'Cobrado',sub:'pagadas'},
+    {num:pending.toLocaleString('es-ES')+'€',label:'Pendiente de cobro',sub:overdue+' vencidas'},
+  ].map(s=>`<div class="card card-top"><div class="stat-num" style="font-size:22px;">${s.num}</div><div class="stat-label">${s.label}</div><div class="stat-sub">${s.sub}</div></div>`).join('');
+  const tbody=document.getElementById('inv-body');
+  const noEl=document.getElementById('no-invoices');
+  noEl.style.display=invoices.length?'none':'block';
+  tbody.innerHTML=invoices.map((inv,i)=>{
+    const sm=invStatusMap[inv.status];
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;color:var(--accent);">F-${String(i+1).padStart(3,'0')}</td>
+      <td style="font-weight:600;color:white;">${inv.cliente}</td>
+      <td>${inv.servicio}</td>
+      <td style="color:#4ade80;font-weight:600;">${inv.importe.toLocaleString('es-ES')}€</td>
+      <td>${inv.fecha}</td>
+      <td>${inv.vence}</td>
+      <td><span class="status-badge ${sm.cls}">${sm.lbl}</span></td>
+      <td style="display:flex;gap:4px;">
+        <select class="btn btn-xs" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:white;padding:2px 5px;" onchange="changeInvStatus(${i},this.value)">
+          <option value="pending" ${inv.status==='pending'?'selected':''}>Pendiente</option>
+          <option value="sent" ${inv.status==='sent'?'selected':''}>Enviada</option>
+          <option value="paid" ${inv.status==='paid'?'selected':''}>Pagada</option>
+          <option value="overdue" ${inv.status==='overdue'?'selected':''}>Vencida</option>
+        </select>
+        <button class="btn btn-xs" style="background:rgba(200,57,43,0.18);color:var(--red);border:none;" onclick="deleteInvoice(${i})">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function openInvoiceModal(){document.getElementById('inv-fecha').value=new Date().toISOString().slice(0,10);const d=new Date();d.setDate(d.getDate()+30);document.getElementById('inv-vence').value=d.toISOString().slice(0,10);openModal('m-invoice');}
+function saveInvoice(){
+  const cliente=document.getElementById('inv-cliente').value.trim();
+  if(!cliente){showToast('Añade el cliente','var(--red)');return;}
+  invoices.push({cliente,servicio:document.getElementById('inv-servicio').value,importe:parseInt(document.getElementById('inv-importe').value)||0,status:document.getElementById('inv-status').value,fecha:document.getElementById('inv-fecha').value,vence:document.getElementById('inv-vence').value});
+  saveAll();closeModal('m-invoice');renderInvoices();showToast('✓ Factura añadida');
+}
+function changeInvStatus(i,s){invoices[i].status=s;saveAll();renderInvoices();}
+function deleteInvoice(i){if(confirm('¿Eliminar factura?')){invoices.splice(i,1);saveAll();renderInvoices();}}
+
+// ── PROPOSALS ──
+const svcData={pm:{name:'Project Management Digital',price:'1.200€/mes'},estrategia:{name:'Consultoría de Estrategia Digital',price:'800€/mes'},ads:{name:'Gestión de Performance Ads',price:'600€/mes + % inversión'},combo:{name:'Pack Estrategia + PM',price:'1.800€/mes'}};
+function genPropuesta(){
+  const cliente=document.getElementById('p-cliente').value.trim()||'[Cliente]';
+  const sector=document.getElementById('p-sector').value.trim()||'[sector]';
+  const svc=document.getElementById('p-servicio').value;
+  const duracion=document.getElementById('p-duracion').value;
+  const problema=document.getElementById('p-problema').value.trim()||'[problema]';
+  const objetivo=document.getElementById('p-objetivo').value.trim()||'[objetivo]';
+  const s=svcData[svc];
+  const fecha=new Date().toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+  const texto=`PROPUESTA — ${s.name.toUpperCase()}
+Para: ${cliente} | Sector: ${sector} | ${fecha}
+${'─'.repeat(48)}
+
+DIAGNÓSTICO
+El principal reto de ${cliente}: ${problema}
+Esto limita vuestra capacidad de ${objetivo}.
+
+${'─'.repeat(48)}
+SERVICIO: ${s.name}
+
+QUÉ INCLUYE:
+→ Sesión de onboarding y definición de objetivos (sem. 1)
+→ Plan de acción con hitos mensuales claros
+→ Reuniones quincenales de seguimiento (45 min)
+→ Reporting mensual con KPIs y recomendaciones
+→ Acceso directo WhatsApp/email en horario laboral
+→ Documentación de procesos y entregables
+
+${'─'.repeat(48)}
+INVERSIÓN
+
+${s.price}
+Duración: ${duracion}
+Pago: Mensual por anticipado
+
+${'─'.repeat(48)}
+POR QUÉ MJ
+
++5 años · Endesa, Sanitas, Repsol
+Máx. 4–5 clientes activos: trato directo
+Metodología Agile: estructura sin rigidez
+
+${'─'.repeat(48)}
+PRÓXIMOS PASOS
+
+① Confirmas que quieres proceder
+② Envío contrato (1 página, simple)
+③ Fijamos fecha de kick-off
+④ Empezamos
+
+María José Lidueña
+mjoseugr@gmail.com · +34 649 256 116 · Madrid`;
+  const out=document.getElementById('pout');
+  out.textContent=texto;out.classList.remove('empty');
+  showToast('✓ Propuesta generada');
+}
+function copyPropuesta(){const t=document.getElementById('pout').textContent;if(t&&!t.includes('aparecerá'))navigator.clipboard.writeText(t).then(()=>showToast('✓ Copiado — pégalo en Canva'));}
+function savePropuestaDrive(){
+  const t=document.getElementById('pout').textContent;
+  if(!t||t.includes('aparecerá')){showToast('Genera primero','var(--red)');return;}
+  const cliente=document.getElementById('p-cliente').value.trim()||'cliente';
+  const blob=new Blob([t],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Propuesta_${cliente.replace(/\s/g,'_')}_${new Date().toISOString().slice(0,10)}.txt`;a.click();
+  showToast('✓ .txt descargado — sube a Drive');
+}
+function savePropuestaHistory(){
+  const t=document.getElementById('pout').textContent;
+  if(!t||t.includes('aparecerá')){showToast('Genera primero','var(--red)');return;}
+  const cliente=document.getElementById('p-cliente').value.trim()||'[Cliente]';
+  const svc=svcData[document.getElementById('p-servicio').value].name;
+  propHistory.push({cliente,svc,fecha:new Date().toLocaleDateString('es-ES'),text:t,status:'enviada'});
+  saveAll();renderPropHistory();showToast('✓ Guardada en historial');
+}
+function renderPropHistory(){
+  const el=document.getElementById('prop-history');
+  if(!propHistory.length){el.innerHTML='<div style="font-size:12px;color:var(--mid);">Ninguna propuesta guardada todavía.</div>';return;}
+  el.innerHTML=propHistory.map((p,i)=>`<div class="ph-item">
+    <div style="flex:1;"><div class="ph-name">${p.cliente}</div><div class="ph-service">${p.svc}</div></div>
+    <select onchange="changePropStatus(${i},this.value)" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:white;padding:3px 6px;font-size:10px;cursor:pointer;">
+      <option value="enviada" ${p.status==='enviada'?'selected':''}>Enviada</option>
+      <option value="en_revision" ${p.status==='en_revision'?'selected':''}>En revisión</option>
+      <option value="aceptada" ${p.status==='aceptada'?'selected':''}>Aceptada ✓</option>
+      <option value="rechazada" ${p.status==='rechazada'?'selected':''}>Rechazada</option>
+    </select>
+    <div class="ph-date">${p.fecha}</div>
+    <button class="btn btn-xs" style="background:rgba(200,57,43,0.18);color:var(--red);border:none;" onclick="deleteProp(${i})">✕</button>
+  </div>`).join('');
+}
+function changePropStatus(i,s){propHistory[i].status=s;saveAll();renderPropHistory();}
+function deleteProp(i){propHistory.splice(i,1);saveAll();renderPropHistory();}
+
+// ── SCRIPTS ──
+function switchScript(btn,id){
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.scontent').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');document.getElementById(id).classList.add('active');
+}
+function copyEl(id){const el=document.getElementById(id);if(el)navigator.clipboard.writeText(el.textContent).then(()=>showToast('✓ Copiado'));}
+
+// ── LINKEDIN ──
+const postTemplates={
+  lanzamiento:t=>`Hoy es un día importante para mí. 🔴\n\nDespués de 5 años gestionando proyectos digitales para empresas como Endesa, Sanitas y Repsol…\n\nHe decidido dar el salto.\n\nA partir de hoy trabajo como consultora digital independiente.\n\n¿Por qué ahora?\nLas empresas no fallan por falta de esfuerzo.\nFallan porque les falta estructura, KPIs claros y alguien que conecte la estrategia con la ejecución real.\n\nEso es exactamente lo que hago.\n\n→ Project Management Digital\n→ Consultoría de Estrategia Digital\n→ Gestión de campañas Performance\n\n${t?t+'\n\n':''}DM abierto 👇\n\n#DigitalStrategy #ProjectManagement #ConsultoraDigital #Madrid`,
+  'caso-exito':t=>`Una cosa que aprendí trabajando con Endesa y Sanitas:\n\nEl problema casi nunca es el presupuesto.\nEs la falta de estructura.\n\n${t||'En uno de los proyectos más exigentes, llegamos con 2 meses de retraso y un equipo sin rumbo.'}\n\nLo que hicimos:\n→ KPIs reales (no vanity metrics)\n→ Sistema de seguimiento semanal\n→ Cada persona supo qué hacía y para cuándo\n\nResultado: entregamos en 6 semanas.\n\nCualquier empresa puede tener la metodología de las grandes.\n\n#ProjectManagement #Resultados #Madrid`,
+  aprendizaje:t=>`El error que más veo en pymes con proyectos digitales:\n\nConfunden actividad con progreso.\n\n${t||'Publican, hacen ads, contratan freelances... pero nada está conectado con un objetivo real.'}\n\nLo que funciona:\n\n1️⃣ Un solo objetivo principal por trimestre\n2️⃣ Todo lo que no ayuda a ese objetivo, para\n3️⃣ Medir solo lo que importa, cada semana\n4️⃣ Revisar y ajustar cada 2 semanas\n\n¿Cuál es tu mayor reto digital ahora mismo?\n\n#EstrategiaDigital #Negocios`,
+  opinion:t=>`Opinión impopular:\n\nLa mayoría de agencias te venden visibilidad.\nLo que necesitas es un sistema.\n\n${t||'He visto empresas gastar miles en ads sin saber qué pasa después del clic.'}\n\nLa diferencia entre empresas que escalan y las que no:\n\nRoadmap → KPIs → Equipo coordinado → Revisión continua.\n\nEso es lo que convierte inversión en resultado.\n\n#MarketingDigital #Estrategia`,
+  detras:t=>`Lo que nadie te cuenta sobre gestionar proyectos para grandes cuentas:\n\nEl 80% del trabajo no es creativo.\n\nEs coordinación. Seguimiento. Comunicación. Documentación.\n\n${t||'En mi etapa con Sanitas llegué a tener 50 proyectos activos simultáneamente.'}\n\nCómo se lleva sin volverse loca:\n\n→ Sistema de priorización claro\n→ Reuniones de 15 min, no de 1 hora\n→ Documentar todo, siempre\n→ Distinguir urgente de importante\n\n#TrabajoEnRemoto #ProjectManagement`
+};
+function selPost(btn,t){document.querySelectorAll('.ptype').forEach(b=>b.classList.remove('active'));btn.classList.add('active');postType=t;}
+function genPost(){
+  const tema=document.getElementById('post-tema').value.trim();
+  const p=postTemplates[postType](tema);
+  const out=document.getElementById('post-out');
+  out.textContent=p;out.classList.remove('empty');
+  document.getElementById('li-cc').textContent=p.length+' / 3000';
+}
+function copyPost(){const t=document.getElementById('post-out').textContent;if(t&&!t.includes('aparecerá'))navigator.clipboard.writeText(t).then(()=>showToast('✓ Copiado'));}
+function pubLI(){const t=document.getElementById('post-out').textContent;if(!t||t.includes('aparecerá')){showToast('Genera el post primero','var(--red)');return;}navigator.clipboard.writeText(t).then(()=>{showToast('✓ Copiado — abriendo LinkedIn...');setTimeout(()=>window.open('https://www.linkedin.com/feed/?shareActive=true','_blank'),700);});}
+
+// ── PLAN DIARIO (dinámico) ──
+function buildPlanTasks(){
+  const base=[
+    {group:'HOY — Imprescindible',badge:'PRIORITARIO',tasks:[
+      {text:'Actualizar LinkedIn: titular + about section',pri:'alta',done:false},
+      {text:'Publicar post de lanzamiento (LinkedIn Posts)',pri:'alta',done:false},
+      {text:'Enviar 5 mensajes de captación (Scripts → LinkedIn Frío)',pri:'alta',done:false},
+    ]},
+    {group:'Día 2–3',badge:'ESTA SEMANA',tasks:[
+      {text:'Enviar 5 mensajes más (total: 10)',pri:'alta',done:false},
+      {text:'Configurar Calendly (slot diagnóstico gratuito 30 min)',pri:'alta',done:false},
+      {text:'Configurar Google Sheets (pestaña Sync, 5 min)',pri:'media',done:false},
+      {text:'Publicar segundo post en LinkedIn',pri:'media',done:false},
+    ]},
+  ];
+  // Dynamic tasks based on CRM state
+  const calls=leads.filter(l=>l.status==='llamada');
+  const props=leads.filter(l=>l.status==='propuesta');
+  const stales=leads.filter(l=>isStale(l));
+  const dynamic={group:'Tareas generadas por tu CRM',badge:'AUTOMÁTICO',tasks:[]};
+  calls.forEach(l=>dynamic.tasks.push({text:`Llamada agendada con ${l.nombre} (${l.empresa}) — prepara tus 5 preguntas`,pri:'alta',done:false}));
+  props.forEach(l=>dynamic.tasks.push({text:`Seguimiento propuesta ${l.nombre} — llamar si sin respuesta en 48h`,pri:'alta',done:false}));
+  stales.slice(0,3).forEach(l=>dynamic.tasks.push({text:`Reactivar lead frío: ${l.nombre} (${l.empresa}) — ${daysSince(l.lastContact||l.fecha)}d sin contacto`,pri:'media',done:false}));
+  if(!dynamic.tasks.length)dynamic.tasks.push({text:'Sin tareas urgentes de CRM — sigue prospectando',pri:'media',done:false});
+  const groups=[...base,dynamic];
+  // Bloque de desarrollo profesional (siempre visible)
+  groups.push({group:'Crecimiento y sistema',badge:'CONTINUO',tasks:[
+    {text:'Revisar y responder comentarios de tus posts de LinkedIn',pri:'media',done:false},
+    {text:'Buscar 5 perfiles nuevos de potenciales clientes (guardar en CRM)',pri:'media',done:false},
+    {text:'Dedicar 20 min a mejorar tu oferta o portfolio',pri:'baja',done:false},
+    {text:'Revisar métricas de la semana: leads contactados, respuestas, reuniones',pri:'baja',done:false},
+    {text:'Aprender algo nuevo: newsletter, vídeo, artículo del sector (20 min)',pri:'baja',done:false},
+  ]});
+  if(!tasks){tasks={};groups.forEach((g,gi)=>g.tasks.forEach((_,ti)=>tasks[`${gi}-${ti}`]=false));}
+  return groups;
+}
+function renderPlan(){
+  const groups=buildPlanTasks();
+  const total=groups.reduce((a,g)=>a+g.tasks.length,0);
+  const done=Object.values(tasks||{}).filter(Boolean).length;
+  document.getElementById('plan-prog').style.width=Math.round((done/Math.max(total,1))*100)+'%';
+  document.getElementById('plan-pct').textContent=`${done} de ${total} tareas completadas`;
+  document.getElementById('plan-body').innerHTML=groups.map((g,gi)=>{
+    const allDone=g.tasks.every((_,ti)=>tasks[`${gi}-${ti}`]);
+    return `<div class="dblock">
+      <div class="dheader"><div class="dtitle">${g.group}</div><div class="dbadge ${allDone?'done':''}">${allDone?'✓ COMPLETADO':g.badge}</div></div>
+      ${g.tasks.map((t,ti)=>`<div class="titem ${tasks[`${gi}-${ti}`]?'done':''}" onclick="togglePlanTask(${gi},${ti})">
+        <div class="tcheck">${tasks[`${gi}-${ti}`]?'✓':''}</div>
+        <div class="ttext">${t.text}</div>
+        <div class="tpri ${t.pri==='media'?'med':''}">${t.pri}</div>
+      </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+function togglePlanTask(gi,ti){
+  if(!tasks)tasks={};
+  tasks[`${gi}-${ti}`]=!tasks[`${gi}-${ti}`];
+  saveAll();renderPlan();loadNotes();
+  if(tasks[`${gi}-${ti}`])showToast('✓ Tarea completada 💪');
+}
+function saveNotes(){
+  const txt=document.getElementById('plan-notes').value;
+  localStorage.setItem('mj3-plan-notes',txt);
+  document.getElementById('notes-status').textContent='✓ Guardado · '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  showToast('✓ Notas guardadas');
+}
+function loadNotes(){
+  const el=document.getElementById('plan-notes');
+  if(!el)return;
+  el.value=localStorage.getItem('mj3-plan-notes')||'';
+  el.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveNotes();}});
+}
+
+// ── SYNC / SHEETS ──
+function renderSyncPreview(){
+  const el=document.getElementById('sync-preview');
+  if(!leads.length){el.innerHTML='<div style="font-size:12px;color:var(--mid);">Añade leads al CRM para ver la previsualización.</div>';return;}
+  el.innerHTML=`<table class="inv-table"><thead><tr><th>Nombre</th><th>Empresa</th><th>Estado</th><th>Valor €</th><th>Último contacto</th></tr></thead><tbody>
+    ${leads.map(l=>`<tr><td>${l.nombre}</td><td>${l.empresa||'—'}</td><td>${l.status}</td><td style="color:#4ade80;">${l.valor?l.valor+'€':'-'}</td><td style="font-family:'DM Mono',monospace;font-size:10px;">${l.lastContact||l.fecha}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+function exportCSV(){
+  const headers=['Nombre','Empresa','Servicio','Estado','Contacto','Valor','Último contacto','Notas','Fecha'];
+  const rows=leads.map(l=>[l.nombre,l.empresa,l.servicio,l.status,l.contacto,l.valor,l.lastContact||l.fecha,(l.notas||'').replace(/,/g,';'),l.fecha].map(v=>`"${v||''}"`).join(','));
+  const csv=[headers.join(','),...rows].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`MJHub_Leads_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+  showToast('✓ CSV descargado');
+}
+function markW(n){wizard['step'+n]=true;localStorage.setItem('mj3-wizard',JSON.stringify(wizard));const el=document.getElementById('wz'+n);if(el){el.textContent='✓';el.classList.add('done');}updateSyncStatus();showToast('✓ Paso '+n+' completado');}
+function restoreWizard(){[1,2,3,4].forEach(n=>{if(wizard['step'+n]){const el=document.getElementById('wz'+n);if(el){el.textContent='✓';el.classList.add('done');}}});updateSyncStatus();}
+function updateSyncStatus(){const done=Object.keys(wizard).length>=4;document.getElementById('sync-dot').className='sdot'+(done?'':' off');document.getElementById('sync-label').textContent=done?'Sheets: activo':'Sheets: no config.';}
+
+// ── SAVE ──
+function save(){localStorage.setItem('mj3-leads',JSON.stringify(leads));}
+function saveAll(){
+  localStorage.setItem('mj3-leads',JSON.stringify(leads));
+  localStorage.setItem('mj3-events',JSON.stringify(events));
+  localStorage.setItem('mj3-clients',JSON.stringify(clients));
+  localStorage.setItem('mj3-invoices',JSON.stringify(invoices));
+  localStorage.setItem('mj3-tasks',JSON.stringify(tasks));
+  localStorage.setItem('mj3-props',JSON.stringify(propHistory));
+}
+
+// ── IMPORT 103 LEADS ──
+const EXCEL_LEADS=[{"nombre":"Adglow","empresa":"Adglow","servicio":"pm","notas":"⭐ ALTA · Agencias — PM senior subcontrato","valor":1200,"_origen":"Agencias"},{"nombre":"Atrevia","empresa":"Atrevia","servicio":"pm","notas":"⭐ ALTA · Agencias — PM senior subcontrato","valor":1200,"_origen":"Agencias"},{"nombre":"Apache Digital","empresa":"Apache Digital","servicio":"pm","notas":"⭐ ALTA · Agencias — PM senior subcontrato","valor":1200,"_origen":"Agencias"},{"nombre":"Beon Worldwide","empresa":"Beon Worldwide","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Casanova","empresa":"Casanova","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Circus","empresa":"Circus","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Darwin Social Noise","empresa":"Darwin Social Noise","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Digital Group","empresa":"Digital Group","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Digital Menta","empresa":"Digital Menta","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"El Ruso de Rocky","empresa":"El Ruso de Rocky","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Elogia","empresa":"Elogia","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"contacto":"https://www.linkedin.com/in/susanagarciahernandez/","_origen":"Agencias"},{"nombre":"Flat 101","empresa":"Flat 101","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Good Rebels","empresa":"Good Rebels","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Havas Group España","empresa":"Havas Group España","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Internet República","empresa":"Internet República","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Kanlli","empresa":"Kanlli","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"La Despensa","empresa":"La Despensa","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Leo Burnett","empresa":"Leo Burnett","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Making Science","empresa":"Making Science","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Manifiesto","empresa":"Manifiesto","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"McCann","empresa":"McCann","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"MediaBrands","empresa":"MediaBrands","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Mono Madrid","empresa":"Mono Madrid","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Ogilvy","empresa":"Ogilvy","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"OnTwice","empresa":"OnTwice","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Paradigma Digital","empresa":"Paradigma Digital","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"PinguinoTorreblanca","empresa":"PinguinoTorreblanca","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Publicis","empresa":"Publicis","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Relevant Traffic","empresa":"Relevant Traffic","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"contacto":"Enviado prácticas SEO","_origen":"Agencias"},{"nombre":"Rocket Digital","empresa":"Rocket Digital","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"ROI UP Group","empresa":"ROI UP Group España","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Shackleton","empresa":"Shackleton","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Socialmood","empresa":"Socialmood","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"t2o","empresa":"t2o","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"contacto":"https://www.linkedin.com/in/lmendoza85/","_origen":"Agencias"},{"nombre":"TBWA","empresa":"TBWA","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"The cocktail","empresa":"The cocktail","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"WAM We are Marketing","empresa":"WAM We are Marketing","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Wysiwyg","empresa":"Wysiwyg","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Ymedia","empresa":"Ymedia","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Garaje de ideas","empresa":"Garaje de ideas","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"Habitant","empresa":"Habitant","servicio":"pm","notas":"⭐ ALTA · Agencias","valor":1200,"_origen":"Agencias"},{"nombre":"&Rosas","empresa":"&Rosas","servicio":"tbd","notas":"🟡 MEDIA · Agencias","valor":800,"_origen":"Agencias"},{"nombre":"Agencia Kitchen","empresa":"Agencia Kitchen","servicio":"tbd","notas":"🟡 MEDIA · Agencias","valor":800,"_origen":"Agencias"},{"nombre":"Everis","empresa":"Everis","servicio":"tbd","notas":"🟡 MEDIA · Agencias","valor":800,"_origen":"Agencias"},{"nombre":"Sr Burns","empresa":"Sr Burns","servicio":"tbd","notas":"🟡 MEDIA · Agencias · Alejandro Peris","valor":800,"_origen":"Agencias"},{"nombre":"Endesa","empresa":"Endesa","servicio":"strategy","notas":"⭐ Cliente directo pasado — REFERENCIA CLAVE","valor":1500,"_origen":"Clientes pasados"},{"nombre":"Sanitas Mayores","empresa":"Sanitas Mayores","servicio":"pm","notas":"⭐ Cliente directo pasado — REFERENCIA CLAVE","valor":1200,"_origen":"Clientes pasados"},{"nombre":"Repsol","empresa":"Repsol","servicio":"strategy","notas":"⭐ Cliente pasado — recontactar estrategia digital","valor":1200,"_origen":"Clientes pasados"},{"nombre":"PH Serkonten","empresa":"PH Serkonten","servicio":"pm","notas":"⭐ Cliente pasado — PM puntual","valor":1000,"_origen":"Clientes pasados"},{"nombre":"La Redoute","empresa":"La Redoute","servicio":"ads","notas":"⭐ Cliente pasado ecommerce — pitch gestión ads","valor":800,"_origen":"Clientes pasados"},{"nombre":"GoDaddy","empresa":"GoDaddy","servicio":"strategy","notas":"⭐ Cliente pasado tech — recontactar","valor":1000,"_origen":"Clientes pasados"},{"nombre":"Novanor","empresa":"Novanor","servicio":"pm","notas":"⭐ Cliente pasado — recontactar","valor":800,"_origen":"Clientes pasados"},{"nombre":"Udima","empresa":"Udima","servicio":"strategy","notas":"⭐ Cliente pasado educación","valor":800,"_origen":"Clientes pasados"},{"nombre":"Tempos Vega Sicilia","empresa":"Tempos Vega Sicilia","servicio":"strategy","notas":"⭐ Cliente pasado premium","valor":1000,"_origen":"Clientes pasados"},{"nombre":"Securitas","empresa":"Securitas","servicio":"strategy","notas":"⭐ Cliente pasado — recontactar","valor":800,"_origen":"Clientes pasados"},{"nombre":"Quirónsalud","empresa":"Quirónsalud","servicio":"strategy","notas":"🏥 ALTA · Salud · red clínicas privadas Madrid","valor":1500,"_origen":"Salud"},{"nombre":"Vithas","empresa":"Vithas","servicio":"pm","notas":"🏥 ALTA · Salud · hospitales privados en expansión","valor":1500,"_origen":"Salud"},{"nombre":"HM Hospitales","empresa":"HM Hospitales","servicio":"pm","notas":"🏥 ALTA · Salud · cadena madrileña","valor":1200,"_origen":"Salud"},{"nombre":"Mapfre Salud","empresa":"Mapfre Salud","servicio":"strategy","notas":"🏥 ALTA · Salud · aseguradora con equipo digital","valor":1500,"_origen":"Salud"},{"nombre":"DomusVi","empresa":"DomusVi","servicio":"pm","notas":"🏥 ALTA · Salud · residencias digitalizando captación","valor":1200,"_origen":"Salud"},{"nombre":"Clínica U. Navarra Madrid","empresa":"Clínica U. Navarra Madrid","servicio":"strategy","notas":"🏥 ALTA · Salud · alto presupuesto digital","valor":2000,"contacto":"mkt@unav.es","_origen":"Salud"},{"nombre":"Affidea España","empresa":"Affidea España","servicio":"pm","notas":"🟡 MEDIA · Salud · diagnóstico imagen","valor":1200,"_origen":"Salud"},{"nombre":"Pompeii Brand","empresa":"Pompeii Brand","servicio":"pm","notas":"🛒 ALTA · Ecommerce · moda Madrid","valor":1200,"_origen":"Ecommerce"},{"nombre":"Freshly Cosmetics","empresa":"Freshly Cosmetics","servicio":"pm","notas":"🛒 ALTA · Ecommerce · beauty 100% online","valor":1200,"_origen":"Ecommerce"},{"nombre":"Hawkers","empresa":"Hawkers","servicio":"strategy","notas":"🛒 ALTA · Ecommerce · gafas, ecommerce grande España","valor":1500,"_origen":"Ecommerce"},{"nombre":"Druni","empresa":"Druni","servicio":"pm","notas":"🟡 MEDIA · Ecommerce · perfumería","valor":1000,"_origen":"Ecommerce"},{"nombre":"Lékué","empresa":"Lékué","servicio":"pm","notas":"🟡 MEDIA · Ecommerce · utensilios cocina","valor":1000,"_origen":"Ecommerce"},{"nombre":"Masaltos.com","empresa":"Masaltos.com","servicio":"pm","notas":"🟡 MEDIA · Ecommerce","valor":800,"contacto":"info@masaltos.com","_origen":"Ecommerce"},{"nombre":"Imma Comella","empresa":"Ercros","servicio":"strategy","notas":"🟡 MEDIA · Red Ajedrez · Directora r. institucionales","valor":800,"_origen":"Red Ajedrez"},{"nombre":"Julián Sánchez","empresa":"Rover España","servicio":"strategy","notas":"🟡 MEDIA · Red Ajedrez","valor":800,"_origen":"Red Ajedrez"},{"nombre":"Fernando Riaño","empresa":"Fundación ONCE","servicio":"strategy","notas":"🟡 MEDIA · Red Ajedrez · Director r. institucionales","valor":800,"_origen":"Red Ajedrez"},{"nombre":"Oficina Patrocinios","empresa":"Telefónica","servicio":"strategy","notas":"🟡 MEDIA · Red Ajedrez","valor":800,"contacto":"oficina.patrocinios@telefonica.com","_origen":"Red Ajedrez"},{"nombre":"Iberia","empresa":"Iberia","servicio":"strategy","notas":"🟡 MEDIA · Red Ajedrez","valor":800,"_origen":"Red Ajedrez"},{"nombre":"Sanitas (corporativo)","empresa":"Sanitas","servicio":"strategy","notas":"🟡 MEDIA · Red Ajedrez","valor":800,"_origen":"Red Ajedrez"},{"nombre":"Occidental Aranjuez","empresa":"Occidental Aranjuez","servicio":"strategy","notas":"🟡 MEDIA · Red Ajedrez · CRM Aranjuez","valor":800,"contacto":"aranjuez.ayb@occidentalhotels.com","_origen":"Red Ajedrez"}];
+
+function importLeads(){
+  const existing=new Set(leads.map(l=>l.empresa.toLowerCase().trim()));
+  let added=0;
+  const now=new Date().toISOString().slice(0,10);
+  EXCEL_LEADS.forEach(el=>{
+    const key=el.empresa.toLowerCase().trim();
+    if(!existing.has(key)){
+      leads.push({id:Date.now()+Math.floor(Math.random()*99999),nombre:el.nombre,empresa:el.empresa,servicio:el.servicio||'tbd',status:'contactar',contacto:el.contacto||'',notas:el.notas||'',valor:el.valor||0,lastContact:now,fecha:new Date().toLocaleDateString('es-ES')});
+      existing.add(key);added++;
+    }
+  });
+  save();renderKanban();renderDash();
+  showToast(added>0?`✅ ${added} leads importados 🚀`:'ℹ️ Todos ya estaban en el CRM','#1a7340');
+}
+
+// ── KLAVIYO ──
+const KV_LISTS={leads:'MJ Hub — Leads',propuesta:'MJ Hub — Propuesta',clientes:'MJ Hub — Clientes',reactivacion:'MJ Hub — Reactivación'};
+let kvListIds=JSON.parse(localStorage.getItem('mj3-kv-listids')||'{}');
+let kvLog=JSON.parse(localStorage.getItem('mj3-kv-log')||'[]');
+
+function getKvKey(){return localStorage.getItem('mj3-kv-key')||'';}
+
+function saveKlaviyoKey(){
+  const k=document.getElementById('kv-apikey').value.trim();
+  if(!k){showToast('Introduce la API key','var(--red)');return;}
+  localStorage.setItem('mj3-kv-key',k);
+  document.getElementById('kv-status').innerHTML='<span style="color:#4ade80;">✓ API key guardada en este navegador</span>';
+  showToast('✓ API key guardada');
+}
+
+function toggleKeyVisibility(){
+  const inp=document.getElementById('kv-apikey');
+  inp.type=inp.type==='password'?'text':'password';
+}
+
+function addKvLog(msg,ok=true){
+  const ts=new Date().toLocaleTimeString('es-ES');
+  kvLog.unshift({msg,ok,ts});
+  if(kvLog.length>50)kvLog.pop();
+  localStorage.setItem('mj3-kv-log',JSON.stringify(kvLog));
+  renderKvLog();
+}
+
+function renderKvLog(){
+  const el=document.getElementById('kv-log');
+  if(!el)return;
+  el.innerHTML=kvLog.length===0?'Sin actividad todavía.':
+    kvLog.map(l=>`<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;gap:8px;align-items:flex-start;">
+      <span style="color:${l.ok?'#4ade80':'#fb923c'};flex-shrink:0;">${l.ok?'✓':'✗'}</span>
+      <span style="flex:1;">${l.msg}</span>
+      <span style="color:rgba(255,255,255,0.18);font-family:'DM Mono',monospace;font-size:9px;flex-shrink:0;">${l.ts}</span>
+    </div>`).join('');
+}
+
+function clearKvLog(){kvLog=[];localStorage.setItem('mj3-kv-log',JSON.stringify(kvLog));renderKvLog();}
+
+async function kvRequest(method,path,body=null){
+  const key=getKvKey();
+  if(!key)return null;
+  const opts={method,headers:{'Authorization':'Klaviyo-API-Key '+key,'Content-Type':'application/json','revision':'2024-02-15'}};
+  if(body)opts.body=JSON.stringify(body);
+  try{
+    const r=await fetch('https://a.klaviyo.com/api'+path,opts);
+    if(!r.ok){const e=await r.text();addKvLog('Error '+r.status+': '+path,false);return null;}
+    if(r.status===204)return{};
+    return await r.json();
+  }catch(e){addKvLog('Error de red: '+e.message,false);return null;}
+}
+
+async function setupKlaviyoLists(){
+  const key=getKvKey();
+  if(!key){showToast('Guarda tu API key primero','var(--red)');return;}
+  showToast('Creando listas en Klaviyo...');
+  for(const[slug,name]of Object.entries(KV_LISTS)){
+    if(kvListIds[slug]){addKvLog(`Lista "${name}" ya existe (${kvListIds[slug]})`);continue;}
+    const res=await kvRequest('POST','/lists/',{data:{type:'list',attributes:{name}}});
+    if(res?.data?.id){kvListIds[slug]=res.data.id;addKvLog(`✓ Lista creada: "${name}" → ${res.data.id}`);}
+    else{addKvLog(`No se pudo crear "${name}" — puede que ya exista. Usa "Verificar listas"`,false);}
+  }
+  localStorage.setItem('mj3-kv-listids',JSON.stringify(kvListIds));
+  fetchKlaviyoLists();
+}
+
+async function fetchKlaviyoLists(){
+  const key=getKvKey();
+  if(!key){showToast('Guarda tu API key primero','var(--red)');return;}
+  const res=await kvRequest('GET','/lists/?fields[list]=name');
+  const el=document.getElementById('kv-lists');
+  if(!res){el.innerHTML='<span style="color:#fb923c;">Error al conectar con Klaviyo — verifica tu API key.</span>';return;}
+  const lists=res.data||[];
+  // auto-match names to slugs
+  for(const[slug,name]of Object.entries(KV_LISTS)){
+    const found=lists.find(l=>l.attributes.name===name);
+    if(found&&!kvListIds[slug]){kvListIds[slug]=found.id;}
+  }
+  localStorage.setItem('mj3-kv-listids',JSON.stringify(kvListIds));
+  const hubLists=Object.entries(KV_LISTS).map(([slug,name])=>{
+    const found=lists.find(l=>l.attributes.name===name);
+    return `<div style="display:flex;justify-content:space-between;padding:7px 10px;background:rgba(255,255,255,0.02);border:1px solid var(--border);margin-bottom:4px;">
+      <span style="font-size:12px;">${name}</span>
+      ${found?`<span style="font-size:9px;color:#4ade80;background:rgba(42,122,80,0.2);padding:2px 7px;">✓ CREADA · ${found.id}</span>`:'<span style="font-size:9px;color:#fb923c;background:rgba(251,146,60,0.1);padding:2px 7px;">No encontrada</span>'}
+    </div>`;
+  }).join('');
+  el.innerHTML=hubLists+`<div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:8px;">${lists.length} listas totales en tu cuenta de Klaviyo</div>`;
+  addKvLog(`Verificadas ${lists.length} listas en Klaviyo`);
+}
+
+async function kvUpsertProfile(lead){
+  if(!getKvKey()||!lead.contacto?.includes('@'))return;
+  const body={data:{type:'profile',attributes:{email:lead.contacto,first_name:lead.nombre,last_name:'',properties:{empresa:lead.empresa,servicio:lead.servicio,valor:lead.valor,status_crm:lead.status,origen:lead._origen||''}}}};
+  const res=await kvRequest('POST','/profiles/',body);
+  if(res?.data?.id){
+    addKvLog(`Perfil creado/actualizado: ${lead.nombre} (${lead.contacto})`);
+    return res.data.id;
+  }
+  // 409 = ya existe, buscar por email
+  const search=await kvRequest('GET',`/profiles/?filter=equals(email,"${lead.contacto}")`);
+  return search?.data?.[0]?.id||null;
+}
+
+async function kvAddToList(listSlug,profileId){
+  const listId=kvListIds[listSlug];
+  if(!listId||!profileId)return;
+  const res=await kvRequest('POST',`/lists/${listId}/relationships/profiles/`,{data:[{type:'profile',id:profileId}]});
+  addKvLog(`→ Añadido a lista "${KV_LISTS[listSlug]}"`);
+}
+
+async function kvRemoveFromList(listSlug,profileId){
+  const listId=kvListIds[listSlug];
+  if(!listId||!profileId)return;
+  await kvRequest('DELETE',`/lists/${listId}/relationships/profiles/`,{data:[{type:'profile',id:profileId}]});
+}
+
+// Mapa de status CRM → lista Klaviyo
+const statusToList={contactar:'leads',contactado:'leads',llamada:'leads',propuesta:'propuesta',cerrado:'clientes'};
+
+async function syncLeadToKlaviyo(lead,prevStatus=null){
+  if(!getKvKey())return;
+  if(!lead.contacto?.includes('@')){addKvLog(`Sin email: ${lead.nombre} — no se puede sincronizar`,false);return;}
+  const profileId=await kvUpsertProfile(lead);
+  if(!profileId)return;
+  // quitar de lista anterior si cambió estado
+  if(prevStatus&&prevStatus!==lead.status){
+    const prevList=statusToList[prevStatus];
+    if(prevList)await kvRemoveFromList(prevList,profileId);
+  }
+  const newList=statusToList[lead.status];
+  if(newList)await kvAddToList(newList,profileId);
+}
+
+async function syncStalLeads(){
+  if(!getKvKey()){showToast('Configura Klaviyo primero','var(--red)');return;}
+  const stales=leads.filter(l=>isStale(l)&&l.contacto?.includes('@'));
+  if(!stales.length){showToast('Sin leads fríos con email');return;}
+  showToast(`Sincronizando ${stales.length} leads fríos...`);
+  for(const l of stales){
+    const pid=await kvUpsertProfile(l);
+    if(pid)await kvAddToList('reactivacion',pid);
+  }
+  addKvLog(`${stales.length} leads fríos sincronizados a lista de reactivación`);
+  showToast(`✓ ${stales.length} leads fríos enviados a Klaviyo`);
+}
+
+// Patch saveLead para sincronizar con Klaviyo automáticamente
+const _origSaveLead=saveLead;
+// Override moveLead para sync automático
+const _origMoveLead=moveLead;
+window.moveLead=async function(i,s){
+  const prevStatus=leads[i].status;
+  leads[i].status=s;
+  leads[i].lastContact=new Date().toISOString().slice(0,10);
+  save();renderKanban();renderDash();showToast('→ '+s);
+  // Sync Klaviyo async
+  if(getKvKey())syncLeadToKlaviyo(leads[i],prevStatus);
+};
+
+// Auto-sync stale leads on load
+async function autoSyncOnLoad(){
+  if(!getKvKey())return;
+  const stales=leads.filter(l=>isStale(l)&&l.contacto?.includes('@'));
+  if(stales.length){
+    addKvLog(`Auto-sync al abrir: ${stales.length} leads fríos detectados`);
+    for(const l of stales){const pid=await kvUpsertProfile(l);if(pid)await kvAddToList('reactivacion',pid);}
+    addKvLog(`✓ Auto-sync completado`);
+  }
+}
+
+function navKlaviyo(){
+  const key=getKvKey();
+  if(key)document.getElementById('kv-apikey').value=key.slice(0,6)+'••••••••••••••••••••••••••';
+  document.getElementById('kv-status').innerHTML=key?'<span style="color:#4ade80;">✓ API key configurada en este navegador</span>':'Estado: no configurado';
+  renderKvLog();
+}
+
+// Patch nav para inicializar Klaviyo tab
+const _origNav=nav;
+window.nav=function(name){
+  _origNav(name);
+  if(name==='klaviyo')navKlaviyo();
+  if(name==='plan')setTimeout(loadNotes,50);
+};
+
+// ── BOOT ──
+renderDash();
+renderPropHistory();
+setTimeout(autoSyncOnLoad, 2000);
+setTimeout(loadNotes, 100);
+
+// Detectar entorno local y mostrar aviso en tab Klaviyo
+(function detectLocal(){
+  const isLocal = location.protocol === "file:" || location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  if(!isLocal) return;
+  const _navPatched = window.nav;
+  window.nav = function(name){
+    _navPatched(name);
+    if(name === "klaviyo"){
+      const w = document.getElementById("kv-local-warning");
+      if(w) w.style.display = "block";
+    }
+  };
+})();
+</script>
+</body>
+</html>

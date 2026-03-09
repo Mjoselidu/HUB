@@ -559,6 +559,16 @@ María José</div></div>
       <div style="font-size:10px;color:var(--mid);margin-top:3px;" id="plan-pct">0 de 0 tareas completadas</div>
     </div>
     <div id="plan-body"></div>
+
+    <!-- NOTAS MANUALES -->
+    <div class="card" style="margin-top:16px;border-top:2px solid var(--accent);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);">📝 Mis Notas</div>
+        <button class="btn btn-xs btn-gold" onclick="saveNotes()">Guardar</button>
+      </div>
+      <textarea id="plan-notes" placeholder="Escribe aquí lo que necesitas recordar para mañana... ej: revisar API key de Klaviyo" style="width:100%;min-height:120px;background:rgba(255,255,255,0.03);border:1px solid rgba(212,168,83,0.2);color:rgba(255,255,255,0.8);padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:12px;line-height:1.7;outline:none;resize:vertical;"></textarea>
+      <div id="notes-status" style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:5px;"></div>
+    </div>
   </div>
 
   <!-- ═══ KLAVIYO ═══ -->
@@ -1211,6 +1221,14 @@ function buildPlanTasks(){
   stales.slice(0,3).forEach(l=>dynamic.tasks.push({text:`Reactivar lead frío: ${l.nombre} (${l.empresa}) — ${daysSince(l.lastContact||l.fecha)}d sin contacto`,pri:'media',done:false}));
   if(!dynamic.tasks.length)dynamic.tasks.push({text:'Sin tareas urgentes de CRM — sigue prospectando',pri:'media',done:false});
   const groups=[...base,dynamic];
+  // Bloque de desarrollo profesional (siempre visible)
+  groups.push({group:'Crecimiento y sistema',badge:'CONTINUO',tasks:[
+    {text:'Revisar y responder comentarios de tus posts de LinkedIn',pri:'media',done:false},
+    {text:'Buscar 5 perfiles nuevos de potenciales clientes (guardar en CRM)',pri:'media',done:false},
+    {text:'Dedicar 20 min a mejorar tu oferta o portfolio',pri:'baja',done:false},
+    {text:'Revisar métricas de la semana: leads contactados, respuestas, reuniones',pri:'baja',done:false},
+    {text:'Aprender algo nuevo: newsletter, vídeo, artículo del sector (20 min)',pri:'baja',done:false},
+  ]});
   if(!tasks){tasks={};groups.forEach((g,gi)=>g.tasks.forEach((_,ti)=>tasks[`${gi}-${ti}`]=false));}
   return groups;
 }
@@ -1235,8 +1253,20 @@ function renderPlan(){
 function togglePlanTask(gi,ti){
   if(!tasks)tasks={};
   tasks[`${gi}-${ti}`]=!tasks[`${gi}-${ti}`];
-  saveAll();renderPlan();
+  saveAll();renderPlan();loadNotes();
   if(tasks[`${gi}-${ti}`])showToast('✓ Tarea completada 💪');
+}
+function saveNotes(){
+  const txt=document.getElementById('plan-notes').value;
+  localStorage.setItem('mj3-plan-notes',txt);
+  document.getElementById('notes-status').textContent='✓ Guardado · '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  showToast('✓ Notas guardadas');
+}
+function loadNotes(){
+  const el=document.getElementById('plan-notes');
+  if(!el)return;
+  el.value=localStorage.getItem('mj3-plan-notes')||'';
+  el.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveNotes();}});
 }
 
 // ── SYNC / SHEETS ──
@@ -1472,12 +1502,14 @@ const _origNav=nav;
 window.nav=function(name){
   _origNav(name);
   if(name==='klaviyo')navKlaviyo();
+  if(name==='plan')setTimeout(loadNotes,50);
 };
 
 // ── BOOT ──
 renderDash();
 renderPropHistory();
 setTimeout(autoSyncOnLoad, 2000);
+setTimeout(loadNotes, 100);
 
 // Detectar entorno local y mostrar aviso en tab Klaviyo
 (function detectLocal(){
